@@ -1,656 +1,763 @@
-<!DOCTYPE html>
+ls<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rapid Tally — Gate Evasion Counter</title>
-  <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --tfl-blue:      #003B8E;
-      --tfl-blue-dark: #00286A;
-      --tfl-red:       #E21836;
-      --tfl-yellow:    #FFD400;
-      --bg:            #F5F5F5;
-      --white:         #FFFFFF;
-      --border:        #CCCCCC;
-      --border-light:  #E8E8E8;
-      --text:          #1A1A1A;
-      --text-muted:    #767676;
-    }
-
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Overpass', Arial, sans-serif;
-    }
-
-    .app {
-      max-width: 480px;
-      margin: 0 auto;
-      min-height: 100vh;
-      background: var(--white);
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 0 20px rgba(0,0,0,0.08);
-    }
-
-    /* ── Header ── */
-    .tfl-header {
-      background: var(--tfl-blue);
-    }
-
-    .tfl-header-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-    }
-
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .roundel {
-      width: 42px;
-      height: 42px;
-      flex-shrink: 0;
-    }
-
-    .header-title {
-      color: white;
-      font-size: 1.05rem;
-      font-weight: 700;
-    }
-
-    .header-sub {
-      color: rgba(255,255,255,0.7);
-      font-size: 0.68rem;
-      margin-top: 1px;
-      letter-spacing: 0.03em;
-    }
-
-    .live-pill {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(255,255,255,0.15);
-      padding: 4px 10px;
-      border-radius: 2px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: white;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .live-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #7FFF7F;
-      animation: blink 1.5s ease infinite;
-    }
-
-    @keyframes blink {
-      0%,100% { opacity:1; } 50% { opacity:0.3; }
-    }
-
-    .red-bar { height: 4px; background: var(--tfl-red); }
-
-    /* ── Shift strip ── */
-    .shift-strip {
-      background: var(--tfl-blue-dark);
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-    }
-
-    .shift-cell {
-      padding: 8px 6px;
-      text-align: center;
-      border-right: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .shift-cell:last-child { border-right: none; }
-
-    .sc-label {
-      font-size: 0.56rem;
-      color: rgba(255,255,255,0.55);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 2px;
-    }
-
-    .sc-value {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: white;
-    }
-
-    /* ── Counter ── */
-    .counter-block {
-      padding: 24px 20px 18px;
-      text-align: center;
-      border-bottom: 1px solid var(--border-light);
-      background: var(--white);
-    }
-
-    .counter-label {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 4px;
-    }
-
-    .counter-num {
-      font-size: 6rem;
-      font-weight: 700;
-      color: var(--tfl-blue);
-      line-height: 1;
-      letter-spacing: -0.02em;
-      transition: transform 0.08s ease;
-    }
-
-    .counter-num.bump { transform: scale(1.06); }
-
-    .counter-sub {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-top: 4px;
-    }
-
-    /* ── Record button ── */
-    .main-btn-wrap {
-      padding: 14px 16px;
-      background: var(--white);
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .record-btn {
-      width: 100%;
-      height: 110px;
-      background: var(--tfl-blue);
-      color: white;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      transition: background 0.1s, transform 0.08s;
-    }
-
-    .record-btn:active {
-      background: var(--tfl-blue-dark);
-      transform: scale(0.99);
-    }
-
-    .record-btn-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      gap: 5px;
-      pointer-events: none;
-    }
-
-    .rbi-icon { font-size: 1.9rem; line-height: 1; }
-
-    .rbi-text {
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .rbi-hint {
-      font-size: 0.65rem;
-      color: rgba(255,255,255,0.6);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .ripple {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.22);
-      transform: scale(0);
-      animation: rpl 0.5s ease-out forwards;
-      pointer-events: none;
-    }
-
-    @keyframes rpl { to { transform: scale(4); opacity: 0; } }
-
-    /* ── Action row ── */
-    .action-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .act-btn {
-      background: var(--white);
-      border: none;
-      border-right: 1px solid var(--border-light);
-      padding: 14px 10px;
-      cursor: pointer;
-      text-align: center;
-      transition: background 0.1s;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .act-btn:last-child { border-right: none; }
-    .act-btn:active { background: #EEF3FF; }
-
-    .act-icon { font-size: 1.2rem; margin-bottom: 3px; }
-
-    .act-label {
-      display: block;
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--tfl-blue);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .act-sub {
-      display: block;
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    /* ── Section header — WAASB breadcrumb style ── */
-    .sec-header {
-      background: var(--tfl-blue);
-      color: white;
-      padding: 7px 16px;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .sec-badge {
-      background: rgba(255,255,255,0.18);
-      padding: 2px 8px;
-      border-radius: 2px;
-      font-size: 0.62rem;
-      letter-spacing: 0.06em;
-    }
-
-    /* ── Activity list ── */
-    .activity-list { background: var(--white); flex: 1; }
-
-    .activity-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 11px 16px;
-      border-bottom: 1px solid var(--border-light);
-      animation: fadeIn 0.18s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; background: #EEF3FF; }
-      to   { opacity: 1; background: transparent; }
-    }
-
-    .act-left { display: flex; align-items: center; gap: 12px; }
-
-    .type-bar {
-      width: 4px; height: 34px;
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-
-    .bar-single { background: var(--tfl-blue); }
-    .bar-group  { background: var(--tfl-yellow); }
-
-    .act-type {
-      font-size: 0.82rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .act-detail {
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .act-time {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .empty-state {
-      padding: 28px 20px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      line-height: 1.7;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    /* ── EJM bar ── */
-    .ejm-bar {
-      background: var(--tfl-blue);
-      padding: 5px 16px;
-      text-align: right;
-    }
-
-    .ejm-text {
-      font-size: 0.6rem;
-      font-weight: 700;
-      color: rgba(255,255,255,0.6);
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-    }
-
-    /* ── Status bar ── */
-    .status-bar {
-      background: #1A1A1A;
-      padding: 8px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      bottom: 0;
-    }
-
-    .sb-left {
-      font-size: 0.65rem;
-      color: rgba(255,255,255,0.55);
-      letter-spacing: 0.03em;
-    }
-
-    .sb-left span { color: white; font-weight: 600; }
-
-    .end-btn {
-      background: var(--tfl-red);
-      color: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 2px;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      cursor: pointer;
-      transition: background 0.1s;
-    }
-
-    .end-btn:active { background: #B5102A; }
-
-    /* ── Toast ── */
-    .toast {
-      position: fixed;
-      bottom: 56px;
-      left: 50%;
-      transform: translateX(-50%) translateY(8px);
-      background: #1A1A1A;
-      color: white;
-      padding: 9px 18px;
-      border-radius: 3px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      opacity: 0;
-      transition: all 0.2s ease;
-      z-index: 999;
-      white-space: nowrap;
-      border-left: 4px solid var(--tfl-blue);
-    }
-
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* ── Flash ── */
-    .flash {
-      position: fixed; inset: 0;
-      background: rgba(0,59,142,0.07);
-      pointer-events: none;
-      opacity: 0;
-      z-index: 500;
-      transition: opacity 0.15s;
-    }
-
-    .flash.show { opacity: 1; }
-  </style>
-</head>
-<body>
-
-<div class="flash" id="flash"></div>
-<div class="toast" id="toast"></div>
-
-<div class="app">
-
-  <!-- Header -->
-  <div class="tfl-header">
-    <div class="tfl-header-top">
-      <div class="header-brand">
-        <svg class="roundel" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="21" cy="21" r="20" fill="#003B8E"/>
-          <circle cx="21" cy="21" r="20" fill="none" stroke="#E21836" stroke-width="4.5"/>
-          <rect x="1" y="18" width="40" height="6" fill="#E21836"/>
-        </svg>
-        <div>
-          <div class="header-title">Rapid Tally</div>
-          <div class="header-sub">Gate Evasion Counter · Beta</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rapid Report — Gate Evasion Counter</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --tfl-blue: #003b8e;
+        --tfl-blue-dark: #00286a;
+        --tfl-red: #e21836;
+        --tfl-yellow: #ffd400;
+        --bg: #f5f5f5;
+        --white: #ffffff;
+        --border: #cccccc;
+        --border-light: #e8e8e8;
+        --text: #1a1a1a;
+        --text-muted: #767676;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Overpass", Arial, sans-serif;
+      }
+
+      .app {
+        max-width: 480px;
+        margin: 0 auto;
+        min-height: 100vh;
+        background: var(--white);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+      }
+
+      /* ── Header ── */
+      .tfl-header {
+        background: var(--tfl-blue);
+      }
+
+      .tfl-header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .roundel {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+      }
+
+      .header-title {
+        color: white;
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      .header-sub {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.68rem;
+        margin-top: 1px;
+        letter-spacing: 0.03em;
+      }
+
+      .live-pill {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 4px 10px;
+        border-radius: 2px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: white;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #7fff7f;
+        animation: blink 1.5s ease infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      .red-bar {
+        height: 4px;
+        background: var(--tfl-red);
+      }
+
+      /* ── Shift strip ── */
+      .shift-strip {
+        background: var(--tfl-blue-dark);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .shift-cell {
+        padding: 8px 6px;
+        text-align: center;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .shift-cell:last-child {
+        border-right: none;
+      }
+
+      .sc-label {
+        font-size: 0.56rem;
+        color: rgba(255, 255, 255, 0.55);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 2px;
+      }
+
+      .sc-value {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: white;
+      }
+
+      /* ── Counter ── */
+      .counter-block {
+        padding: 24px 20px 18px;
+        text-align: center;
+        border-bottom: 1px solid var(--border-light);
+        background: var(--white);
+      }
+
+      .counter-label {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 4px;
+      }
+
+      .counter-num {
+        font-size: 6rem;
+        font-weight: 700;
+        color: var(--tfl-blue);
+        line-height: 1;
+        letter-spacing: -0.02em;
+        transition: transform 0.08s ease;
+      }
+
+      .counter-num.bump {
+        transform: scale(1.06);
+      }
+
+      .counter-sub {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 4px;
+      }
+
+      /* ── Record button ── */
+      .main-btn-wrap {
+        padding: 14px 16px;
+        background: var(--white);
+        border-bottom: 1px solid var(--border-light);
+      }
+
+      .record-btn {
+        width: 100%;
+        height: 110px;
+        background: var(--tfl-blue);
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        transition:
+          background 0.1s,
+          transform 0.08s;
+      }
+
+      .record-btn:active {
+        background: var(--tfl-blue-dark);
+        transform: scale(0.99);
+      }
+
+      .record-btn-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: 5px;
+        pointer-events: none;
+      }
+
+      .rbi-icon {
+        font-size: 1.9rem;
+        line-height: 1;
+      }
+
+      .rbi-text {
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .rbi-hint {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.22);
+        transform: scale(0);
+        animation: rpl 0.5s ease-out forwards;
+        pointer-events: none;
+      }
+
+      @keyframes rpl {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+
+      /* ── Action row ── */
+      .action-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-bottom: 1px solid var(--border-light);
+      }
+
+      .act-btn {
+        background: var(--white);
+        border: none;
+        border-right: 1px solid var(--border-light);
+        padding: 14px 10px;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.1s;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .act-btn:last-child {
+        border-right: none;
+      }
+      .act-btn:active {
+        background: #eef3ff;
+      }
+
+      .act-icon {
+        font-size: 1.2rem;
+        margin-bottom: 3px;
+      }
+
+      .act-label {
+        display: block;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--tfl-blue);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .act-sub {
+        display: block;
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      /* ── Section header — WAASB breadcrumb style ── */
+      .sec-header {
+        background: var(--tfl-blue);
+        color: white;
+        padding: 7px 16px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .sec-badge {
+        background: rgba(255, 255, 255, 0.18);
+        padding: 2px 8px;
+        border-radius: 2px;
+        font-size: 0.62rem;
+        letter-spacing: 0.06em;
+      }
+
+      /* ── Activity list ── */
+      .activity-list {
+        background: var(--white);
+        flex: 1;
+      }
+
+      .activity-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 16px;
+        border-bottom: 1px solid var(--border-light);
+        animation: fadeIn 0.18s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          background: #eef3ff;
+        }
+        to {
+          opacity: 1;
+          background: transparent;
+        }
+      }
+
+      .act-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .type-bar {
+        width: 4px;
+        height: 34px;
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
+
+      .bar-single {
+        background: var(--tfl-blue);
+      }
+      .bar-group {
+        background: var(--tfl-yellow);
+      }
+
+      .act-type {
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      .act-detail {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .act-time {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .empty-state {
+        padding: 28px 20px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        line-height: 1.7;
+        border-bottom: 1px solid var(--border-light);
+      }
+
+      /* ── EJM bar ── */
+      .ejm-bar {
+        background: var(--tfl-blue);
+        padding: 5px 16px;
+        text-align: right;
+      }
+
+      .ejm-text {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+
+      /* ── Status bar ── */
+      .status-bar {
+        background: #1a1a1a;
+        padding: 8px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        bottom: 0;
+      }
+
+      .sb-left {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.55);
+        letter-spacing: 0.03em;
+      }
+
+      .sb-left span {
+        color: white;
+        font-weight: 600;
+      }
+
+      .end-btn {
+        background: var(--tfl-red);
+        color: white;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 2px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+
+      .end-btn:active {
+        background: #b5102a;
+      }
+
+      /* ── Toast ── */
+      .toast {
+        position: fixed;
+        bottom: 56px;
+        left: 50%;
+        transform: translateX(-50%) translateY(8px);
+        background: #1a1a1a;
+        color: white;
+        padding: 9px 18px;
+        border-radius: 3px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        opacity: 0;
+        transition: all 0.2s ease;
+        z-index: 999;
+        white-space: nowrap;
+        border-left: 4px solid var(--tfl-blue);
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* ── Flash ── */
+      .flash {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 59, 142, 0.07);
+        pointer-events: none;
+        opacity: 0;
+        z-index: 500;
+        transition: opacity 0.15s;
+      }
+
+      .flash.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flash" id="flash"></div>
+    <div class="toast" id="toast"></div>
+
+    <div class="app">
+      <!-- Header -->
+      <div class="tfl-header">
+        <div class="tfl-header-top">
+          <div class="header-brand">
+            <svg
+              class="roundel"
+              viewBox="0 0 42 42"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="21" cy="21" r="20" fill="#003B8E" />
+              <circle
+                cx="21"
+                cy="21"
+                r="20"
+                fill="none"
+                stroke="#E21836"
+                stroke-width="4.5"
+              />
+              <rect x="1" y="18" width="40" height="6" fill="#E21836" />
+            </svg>
+            <div>
+              <div class="header-title">Rapid Report</div>
+              <div class="header-sub">Gate Evasion Counter · Beta</div>
+            </div>
+          </div>
+          <div class="live-pill">
+            <div class="live-dot"></div>
+            Active
+          </div>
+        </div>
+        <div class="red-bar"></div>
+      </div>
+
+      <!-- Shift strip -->
+      <div class="shift-strip">
+        <div class="shift-cell">
+          <div class="sc-label">Station</div>
+          <div class="sc-value" id="scStation">—</div>
+        </div>
+        <div class="shift-cell">
+          <div class="sc-label">Start</div>
+          <div class="sc-value" id="scStart">—</div>
+        </div>
+        <div class="shift-cell">
+          <div class="sc-label">Now</div>
+          <div class="sc-value" id="scNow">—</div>
+        </div>
+        <div class="shift-cell">
+          <div class="sc-label">Staff</div>
+          <div class="sc-value">Marci</div>
         </div>
       </div>
-      <div class="live-pill"><div class="live-dot"></div>Active</div>
-    </div>
-    <div class="red-bar"></div>
-  </div>
 
-  <!-- Shift strip -->
-  <div class="shift-strip">
-    <div class="shift-cell">
-      <div class="sc-label">Station</div>
-      <div class="sc-value" id="scStation">—</div>
-    </div>
-    <div class="shift-cell">
-      <div class="sc-label">Start</div>
-      <div class="sc-value" id="scStart">—</div>
-    </div>
-    <div class="shift-cell">
-      <div class="sc-label">Now</div>
-      <div class="sc-value" id="scNow">—</div>
-    </div>
-    <div class="shift-cell">
-      <div class="sc-label">Staff</div>
-      <div class="sc-value">Marci</div>
-    </div>
-  </div>
-
-  <!-- Counter -->
-  <div class="counter-block">
-    <div class="counter-label">Total Incidents This Shift</div>
-    <div class="counter-num" id="counterNum">0</div>
-    <div class="counter-sub">Double Gates Recorded</div>
-  </div>
-
-  <!-- Record button -->
-  <div class="main-btn-wrap">
-    <button class="record-btn" id="recordBtn">
-      <div class="record-btn-inner">
-        <div class="rbi-icon">⚡</div>
-        <div class="rbi-text">Record Incident</div>
-        <div class="rbi-hint">Tap · Single person</div>
+      <!-- Counter -->
+      <div class="counter-block">
+        <div class="counter-label">Total Incidents This Shift</div>
+        <div class="counter-num" id="counterNum">0</div>
+        <div class="counter-sub">Double Gates Recorded</div>
       </div>
-    </button>
-  </div>
 
-  <!-- Action row -->
-  <div class="action-row">
-    <button class="act-btn" id="groupBtn">
-      <div class="act-icon">👥</div>
-      <span class="act-label">Group Entry</span>
-      <span class="act-sub">Multiple evaders</span>
-    </button>
-    <button class="act-btn" id="undoBtn">
-      <div class="act-icon">↩</div>
-      <span class="act-label">Undo Last</span>
-      <span class="act-sub">Remove entry</span>
-    </button>
-  </div>
+      <!-- Record button -->
+      <div class="main-btn-wrap">
+        <button class="record-btn" id="recordBtn">
+          <div class="record-btn-inner">
+            <div class="rbi-icon">⚡</div>
+            <div class="rbi-text">Record Incident</div>
+            <div class="rbi-hint">Tap · Single person</div>
+          </div>
+        </button>
+      </div>
 
-  <!-- Activity -->
-  <div class="sec-header">
-    <span>Recent Activity</span>
-    <span class="sec-badge" id="actBadge">0 Entries</span>
-  </div>
-  <div class="activity-list" id="activityList">
-    <div class="empty-state">
-      No incidents logged yet.<br>
-      Tap <strong>Record Incident</strong> to begin.
+      <!-- Action row -->
+      <div class="action-row">
+        <button class="act-btn" id="groupBtn">
+          <div class="act-icon">👥</div>
+          <span class="act-label">Group Entry</span>
+          <span class="act-sub">Multiple evaders</span>
+        </button>
+        <button class="act-btn" id="undoBtn">
+          <div class="act-icon">↩</div>
+          <span class="act-label">Undo Last</span>
+          <span class="act-sub">Remove entry</span>
+        </button>
+      </div>
+
+      <!-- Activity -->
+      <div class="sec-header">
+        <span>Recent Activity</span>
+        <span class="sec-badge" id="actBadge">0 Entries</span>
+      </div>
+      <div class="activity-list" id="activityList">
+        <div class="empty-state">
+          No incidents logged yet.<br />
+          Tap <strong>Record Incident</strong> to begin.
+        </div>
+      </div>
+
+      <!-- EJM -->
+      <div class="ejm-bar">
+        <span class="ejm-text">Every Journey Matters</span>
+      </div>
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <div class="sb-left">
+          Logged in as <span>Marci</span> &nbsp;·&nbsp;
+          <span id="sbStation">—</span>
+        </div>
+        <button class="end-btn" id="endBtn">End Shift</button>
+      </div>
     </div>
-  </div>
 
-  <!-- EJM -->
-  <div class="ejm-bar">
-    <span class="ejm-text">Every Journey Matters</span>
-  </div>
+    <script>
+      let count = 0;
+      let incidents = [];
+      const shiftStart = new Date();
+      const STATION = "My Station";
 
-  <!-- Status bar -->
-  <div class="status-bar">
-    <div class="sb-left">Logged in as <span>Marci</span> &nbsp;·&nbsp; <span id="sbStation">—</span></div>
-    <button class="end-btn" id="endBtn">End Shift</button>
-  </div>
+      const counterNum = document.getElementById("counterNum");
+      const recordBtn = document.getElementById("recordBtn");
+      const groupBtn = document.getElementById("groupBtn");
+      const undoBtn = document.getElementById("undoBtn");
+      const endBtn = document.getElementById("endBtn");
+      const activityList = document.getElementById("activityList");
+      const actBadge = document.getElementById("actBadge");
+      const flashEl = document.getElementById("flash");
+      const toastEl = document.getElementById("toast");
 
-</div>
+      // Init
+      document.getElementById("scStation").textContent = STATION;
+      document.getElementById("sbStation").textContent = STATION;
+      document.getElementById("scStart").textContent = fmt(shiftStart);
+      tick();
+      setInterval(tick, 1000);
 
-<script>
-  let count = 0;
-  let incidents = [];
-  const shiftStart = new Date();
-  const STATION = 'My Station';
+      function tick() {
+        document.getElementById("scNow").textContent = fmt(new Date());
+      }
 
-  const counterNum  = document.getElementById('counterNum');
-  const recordBtn   = document.getElementById('recordBtn');
-  const groupBtn    = document.getElementById('groupBtn');
-  const undoBtn     = document.getElementById('undoBtn');
-  const endBtn      = document.getElementById('endBtn');
-  const activityList = document.getElementById('activityList');
-  const actBadge    = document.getElementById('actBadge');
-  const flashEl     = document.getElementById('flash');
-  const toastEl     = document.getElementById('toast');
+      function fmt(d) {
+        return d.toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+      }
 
-  // Init
-  document.getElementById('scStation').textContent = STATION;
-  document.getElementById('sbStation').textContent = STATION;
-  document.getElementById('scStart').textContent = fmt(shiftStart);
-  tick(); setInterval(tick, 1000);
+      function logIncident(type, label, amount) {
+        count += amount;
+        incidents.unshift({ time: new Date(), type, label, amount });
+        refreshCounter();
+        refreshList();
+        triggerFlash();
+        addRipple(recordBtn);
+      }
 
-  function tick() {
-    document.getElementById('scNow').textContent = fmt(new Date());
-  }
+      function refreshCounter() {
+        counterNum.textContent = count;
+        counterNum.classList.add("bump");
+        setTimeout(() => counterNum.classList.remove("bump"), 100);
+      }
 
-  function fmt(d) {
-    return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  }
-
-  function logIncident(type, label, amount) {
-    count += amount;
-    incidents.unshift({ time: new Date(), type, label, amount });
-    refreshCounter();
-    refreshList();
-    triggerFlash();
-    addRipple(recordBtn);
-  }
-
-  function refreshCounter() {
-    counterNum.textContent = count;
-    counterNum.classList.add('bump');
-    setTimeout(() => counterNum.classList.remove('bump'), 100);
-  }
-
-  function refreshList() {
-    actBadge.textContent = `${incidents.length} Entr${incidents.length === 1 ? 'y' : 'ies'}`;
-    const shown = incidents.slice(0, 6);
-    if (!shown.length) {
-      activityList.innerHTML = `<div class="empty-state">No incidents logged yet.<br>Tap <strong>Record Incident</strong> to begin.</div>`;
-      return;
-    }
-    activityList.innerHTML = shown.map(i => `
+      function refreshList() {
+        actBadge.textContent = `${incidents.length} Entr${incidents.length === 1 ? "y" : "ies"}`;
+        const shown = incidents.slice(0, 6);
+        if (!shown.length) {
+          activityList.innerHTML = `<div class="empty-state">No incidents logged yet.<br>Tap <strong>Record Incident</strong> to begin.</div>`;
+          return;
+        }
+        activityList.innerHTML = shown
+          .map(
+            (i) => `
       <div class="activity-item">
         <div class="act-left">
-          <div class="type-bar ${i.type === 'single' ? 'bar-single' : 'bar-group'}"></div>
+          <div class="type-bar ${i.type === "single" ? "bar-single" : "bar-group"}"></div>
           <div>
             <div class="act-type">${i.label}</div>
-            <div class="act-detail">${i.amount > 1 ? i.amount + ' people' : '1 person'}</div>
+            <div class="act-detail">${i.amount > 1 ? i.amount + " people" : "1 person"}</div>
           </div>
         </div>
         <div class="act-time">${fmt(i.time)}</div>
-      </div>`).join('');
-  }
+      </div>`,
+          )
+          .join("");
+      }
 
-  function triggerFlash() {
-    flashEl.classList.add('show');
-    setTimeout(() => flashEl.classList.remove('show'), 150);
-  }
+      function triggerFlash() {
+        flashEl.classList.add("show");
+        setTimeout(() => flashEl.classList.remove("show"), 150);
+      }
 
-  function addRipple(btn) {
-    const r = document.createElement('span');
-    r.className = 'ripple';
-    const s = Math.max(btn.offsetWidth, btn.offsetHeight);
-    r.style.cssText = `width:${s}px;height:${s}px;left:${btn.offsetWidth/2-s/2}px;top:${btn.offsetHeight/2-s/2}px`;
-    btn.appendChild(r);
-    setTimeout(() => r.remove(), 600);
-  }
+      function addRipple(btn) {
+        const r = document.createElement("span");
+        r.className = "ripple";
+        const s = Math.max(btn.offsetWidth, btn.offsetHeight);
+        r.style.cssText = `width:${s}px;height:${s}px;left:${btn.offsetWidth / 2 - s / 2}px;top:${btn.offsetHeight / 2 - s / 2}px`;
+        btn.appendChild(r);
+        setTimeout(() => r.remove(), 600);
+      }
 
-  let toastTimer;
-  function showToast(msg) {
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
-  }
+      let toastTimer;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+      }
 
-  recordBtn.addEventListener('click', () => logIncident('single', 'Single Entry', 1));
+      recordBtn.addEventListener("click", () =>
+        logIncident("single", "Single Entry", 1),
+      );
 
-  groupBtn.addEventListener('click', () => {
-    const n = parseInt(prompt('How many in the group?'));
-    if (!isNaN(n) && n > 0) {
-      logIncident('group', 'Group Entry', n);
-      showToast(`Group of ${n} logged`);
-    }
-  });
+      groupBtn.addEventListener("click", () => {
+        const n = parseInt(prompt("How many in the group?"));
+        if (!isNaN(n) && n > 0) {
+          logIncident("group", "Group Entry", n);
+          showToast(`Group of ${n} logged`);
+        }
+      });
 
-  undoBtn.addEventListener('click', () => {
-    if (!incidents.length) { showToast('Nothing to undo'); return; }
-    const last = incidents.shift();
-    count = Math.max(0, count - last.amount);
-    refreshCounter();
-    refreshList();
-    showToast(`Removed: ${last.label}`);
-  });
+      undoBtn.addEventListener("click", () => {
+        if (!incidents.length) {
+          showToast("Nothing to undo");
+          return;
+        }
+        const last = incidents.shift();
+        count = Math.max(0, count - last.amount);
+        refreshCounter();
+        refreshList();
+        showToast(`Removed: ${last.label}`);
+      });
 
-  endBtn.addEventListener('click', () => {
-    if (!count) { showToast('No incidents recorded'); return; }
-    if (confirm(`End shift?\n\nTotal incidents: ${count}\n\nThis will reset the counter.`)) {
-      showToast(`Shift complete — ${count} incidents saved`);
-      count = 0; incidents = [];
-      refreshCounter(); refreshList();
-    }
-  });
-</script>
-</body>
+      endBtn.addEventListener("click", () => {
+        if (!count) {
+          showToast("No incidents recorded");
+          return;
+        }
+        if (
+          confirm(
+            `End shift?\n\nTotal incidents: ${count}\n\nThis will reset the counter.`,
+          )
+        ) {
+          showToast(`Shift complete — ${count} incidents saved`);
+          count = 0;
+          incidents = [];
+          refreshCounter();
+          refreshList();
+        }
+      });
+    </script>
+  </body>
 </html>

@@ -1,4 +1,4 @@
-ls<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -643,6 +643,31 @@ ls<!doctype html>
       document.getElementById("scStart").textContent = fmt(shiftStart);
       tick();
       setInterval(tick, 1000);
+      loadData();
+      refreshCounter();
+      refreshList();
+
+      function saveData() {
+        const data = {
+          count: count,
+          incidents: incidents.map((i) => ({
+            ...i,
+            time: i.time.toISOString(),
+          })),
+        };
+        localStorage.setItem("rapidReport", JSON.stringify(data));
+      }
+
+      function loadData() {
+        const saved = localStorage.getItem("rapidReport");
+        if (!saved) return;
+        const data = JSON.parse(saved);
+        count = data.count;
+        incidents = data.incidents.map((i) => ({
+          ...i,
+          time: new Date(i.time),
+        }));
+      }
 
       function tick() {
         document.getElementById("scNow").textContent = fmt(new Date());
@@ -663,6 +688,7 @@ ls<!doctype html>
         refreshList();
         triggerFlash();
         addRipple(recordBtn);
+        saveData();
       }
 
       function refreshCounter() {
@@ -739,6 +765,7 @@ ls<!doctype html>
         refreshCounter();
         refreshList();
         showToast(`Removed: ${last.label}`);
+        saveData();
       });
 
       endBtn.addEventListener("click", () => {
@@ -754,6 +781,8 @@ ls<!doctype html>
           showToast(`Shift complete — ${count} incidents saved`);
           count = 0;
           incidents = [];
+          localStorage.removeItem("rapidReport");
+
           refreshCounter();
           refreshList();
         }

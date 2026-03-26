@@ -23,6 +23,7 @@
         --tfl-blue: #003b8e;
         --tfl-blue-dark: #00286a;
         --tfl-red: #e21836;
+        --tfl-red-dark: #b5102a;
         --tfl-yellow: #ffd400;
         --bg: #f5f5f5;
         --white: #ffffff;
@@ -201,62 +202,66 @@
         text-transform: uppercase;
       }
 
-      /* ── Record button ── */
-      .main-btn-wrap {
-        padding: 14px 16px;
+      /* ── 80/20 Thumb-Memory Grid ── */
+      .incident-grid {
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
         background: var(--white);
         border-bottom: 1px solid var(--border-light);
       }
 
-      .record-btn {
-        width: 100%;
-        height: 110px;
-        background: var(--tfl-blue);
-        color: white;
+      .inc-btn {
         border: none;
-        border-radius: 3px;
+        border-radius: 4px;
         cursor: pointer;
+        padding: 0;
         position: relative;
         overflow: hidden;
         -webkit-tap-highlight-color: transparent;
-        user-select: none;
-        transition:
-          background 0.1s,
-          transform 0.08s;
+        transition: transform 0.05s;
       }
 
-      .record-btn:active {
-        background: var(--tfl-blue-dark);
-        transform: scale(0.99);
+      .inc-btn:active {
+        transform: translateY(3px);
       }
 
-      .record-btn-inner {
+      .inc-btn-inner {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100%;
-        gap: 5px;
+        padding: 20px 10px;
         pointer-events: none;
       }
 
-      .rbi-icon {
-        font-size: 1.9rem;
-        line-height: 1;
+      .inc-btn.primary {
+        height: 110px;
+        background: var(--tfl-blue);
+        box-shadow: 0 5px 0 var(--tfl-blue-dark);
       }
 
-      .rbi-text {
-        font-size: 1.15rem;
+      .inc-btn.secondary {
+        grid-column: span 2;
+        height: 65px;
+        background: #2c2c2c;
+        box-shadow: 0 4px 0 #000;
+        margin-top: 5px;
+      }
+
+      .inc-label {
+        font-size: 0.95rem;
         font-weight: 700;
+        color: white;
+        text-transform: uppercase;
         letter-spacing: 0.05em;
-        text-transform: uppercase;
       }
-
-      .rbi-hint {
-        font-size: 0.65rem;
-        color: rgba(255, 255, 255, 0.6);
-        letter-spacing: 0.08em;
+      .inc-sub {
+        font-size: 0.6rem;
+        color: rgba(255, 255, 255, 0.7);
         text-transform: uppercase;
+        margin-top: 4px;
       }
 
       .ripple {
@@ -275,38 +280,31 @@
         }
       }
 
-      /* ── Action row ── */
-      .action-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+      /* ── Action/Undo row ── */
+      .undo-row {
         border-bottom: 1px solid var(--border-light);
       }
 
       .act-btn {
+        width: 100%;
         background: var(--white);
         border: none;
-        border-right: 1px solid var(--border-light);
-        padding: 14px 10px;
+        padding: 14px 16px;
         cursor: pointer;
         text-align: center;
         transition: background 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         -webkit-tap-highlight-color: transparent;
       }
 
-      .act-btn:last-child {
-        border-right: none;
-      }
       .act-btn:active {
         background: #eef3ff;
       }
 
-      .act-icon {
-        font-size: 1.2rem;
-        margin-bottom: 3px;
-      }
-
       .act-label {
-        display: block;
         font-size: 0.76rem;
         font-weight: 700;
         color: var(--tfl-blue);
@@ -314,14 +312,7 @@
         letter-spacing: 0.04em;
       }
 
-      .act-sub {
-        display: block;
-        font-size: 0.6rem;
-        color: var(--text-muted);
-        margin-top: 2px;
-      }
-
-      /* ── Section header — WAASB breadcrumb style ── */
+      /* ── Recent Activity ── */
       .sec-header {
         background: var(--tfl-blue);
         color: white;
@@ -340,10 +331,8 @@
         padding: 2px 8px;
         border-radius: 2px;
         font-size: 0.62rem;
-        letter-spacing: 0.06em;
       }
 
-      /* ── Activity list ── */
       .activity-list {
         background: var(--white);
         flex: 1;
@@ -369,24 +358,20 @@
         }
       }
 
-      .act-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
       .type-bar {
         width: 4px;
         height: 34px;
         border-radius: 2px;
         flex-shrink: 0;
       }
-
-      .bar-single {
+      .bar-double-gate {
         background: var(--tfl-blue);
       }
-      .bar-group {
-        background: var(--tfl-yellow);
+      .bar-push-through {
+        background: var(--tfl-red);
+      }
+      .bar-other {
+        background: #2c2c2c;
       }
 
       .act-type {
@@ -395,13 +380,11 @@
         text-transform: uppercase;
         letter-spacing: 0.03em;
       }
-
       .act-detail {
         font-size: 0.65rem;
         color: var(--text-muted);
         margin-top: 2px;
       }
-
       .act-time {
         font-size: 0.8rem;
         font-weight: 600;
@@ -415,16 +398,14 @@
         color: var(--text-muted);
         font-size: 0.8rem;
         line-height: 1.7;
-        border-bottom: 1px solid var(--border-light);
       }
 
-      /* ── EJM bar ── */
+      /* ── Bottom Bar ── */
       .ejm-bar {
         background: var(--tfl-blue);
         padding: 5px 16px;
         text-align: right;
       }
-
       .ejm-text {
         font-size: 0.6rem;
         font-weight: 700;
@@ -433,7 +414,6 @@
         letter-spacing: 0.14em;
       }
 
-      /* ── Status bar ── */
       .status-bar {
         background: #1a1a1a;
         padding: 8px 16px;
@@ -447,9 +427,7 @@
       .sb-left {
         font-size: 0.65rem;
         color: rgba(255, 255, 255, 0.55);
-        letter-spacing: 0.03em;
       }
-
       .sb-left span {
         color: white;
         font-weight: 600;
@@ -464,16 +442,14 @@
         font-size: 0.68rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
         cursor: pointer;
-        transition: background 0.1s;
       }
 
       .end-btn:active {
-        background: #b5102a;
+        background: var(--tfl-red-dark);
       }
 
-      /* ── Toast ── */
+      /* ── Utils ── */
       .toast {
         position: fixed;
         bottom: 56px;
@@ -485,21 +461,16 @@
         border-radius: 3px;
         font-size: 0.74rem;
         font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
         opacity: 0;
         transition: all 0.2s ease;
         z-index: 999;
-        white-space: nowrap;
         border-left: 4px solid var(--tfl-blue);
       }
-
       .toast.show {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
       }
 
-      /* ── Flash ── */
       .flash {
         position: fixed;
         inset: 0;
@@ -509,7 +480,6 @@
         z-index: 500;
         transition: opacity 0.15s;
       }
-
       .flash.show {
         opacity: 1;
       }
@@ -541,7 +511,9 @@
             </svg>
             <div>
               <div class="header-title">Rapid Report</div>
-              <div class="header-sub">Gate Evasion Counter · Beta</div>
+              <div class="header-sub">
+                Operational Intelligence · Milestone 3
+              </div>
             </div>
           </div>
           <div class="live-pill">
@@ -574,45 +546,56 @@
       <div class="counter-block">
         <div class="counter-label">Total Incidents This Shift</div>
         <div class="counter-num" id="counterNum">0</div>
-        <div class="counter-sub">Incidents Recorded</div>
+        <div class="counter-sub">Data-Point Accumulation</div>
         <div class="revenue-range" id="revenueRange" style="display: none">
-          Revenue at Risk: <span id="revMin">£0.00</span> –
+          Est. Revenue at Risk: <span id="revMin">£0.00</span> –
           <span id="revMax">£0.00</span>
         </div>
       </div>
 
-      <div class="main-btn-wrap">
-        <button class="record-btn" id="recordBtn">
-          <div class="record-btn-inner">
-            <div class="rbi-icon">⚡</div>
-            <div class="rbi-text">Record Incident</div>
-            <div class="rbi-hint">Tap · Single person</div>
+      <div class="incident-grid">
+        <button class="inc-btn primary" id="doubleGateBtn">
+          <div class="inc-btn-inner">
+            <div class="inc-label">Double Gate</div>
+            <div class="inc-sub">Tailgate · 1 Person</div>
+          </div>
+        </button>
+
+        <button
+          class="inc-btn primary"
+          id="pushThroughBtn"
+          style="
+            background: var(--tfl-red);
+            box-shadow: 0 5px 0 var(--tfl-red-dark);
+          "
+        >
+          <div class="inc-btn-inner">
+            <div class="inc-label">Push Through</div>
+            <div class="inc-sub">Forced · 1 Person</div>
+          </div>
+        </button>
+
+        <button class="inc-btn secondary" id="groupBtn">
+          <div class="inc-btn-inner">
+            <div class="inc-label">Group Entry</div>
+            <div class="inc-sub">Multiple Evaders · Tap to specify count</div>
           </div>
         </button>
       </div>
 
-      <div class="action-row">
-        <button class="act-btn" id="groupBtn">
-          <div class="act-icon">👥</div>
-          <span class="act-label">Group Entry</span>
-          <span class="act-sub">Multiple evaders</span>
-        </button>
+      <div class="undo-row">
         <button class="act-btn" id="undoBtn">
           <div class="act-icon">↩</div>
-          <span class="act-label">Undo Last</span>
-          <span class="act-sub">Remove entry</span>
+          <span class="act-label">Undo Last Entry</span>
         </button>
       </div>
 
       <div class="sec-header">
-        <span>Recent Activity</span>
+        <span>Live Audit Trail</span>
         <span class="sec-badge" id="actBadge">0 Entries</span>
       </div>
       <div class="activity-list" id="activityList">
-        <div class="empty-state">
-          No incidents logged yet.<br />
-          Tap <strong>Record Incident</strong> to begin.
-        </div>
+        <div class="empty-state">Standing by for gate-line input...</div>
       </div>
 
       <div class="ejm-bar">
@@ -621,7 +604,7 @@
 
       <div class="status-bar">
         <div class="sb-left">
-          Logged in as <span>Marci</span> &nbsp;·&nbsp;
+          System: <span>PWA-v2.1</span> &nbsp;·&nbsp;
           <span id="sbStation">—</span>
         </div>
         <button class="end-btn" id="endBtn">End Shift</button>
@@ -637,10 +620,6 @@
       const STATION = "My Station";
 
       const counterNum = document.getElementById("counterNum");
-      const recordBtn = document.getElementById("recordBtn");
-      const groupBtn = document.getElementById("groupBtn");
-      const undoBtn = document.getElementById("undoBtn");
-      const endBtn = document.getElementById("endBtn");
       const activityList = document.getElementById("activityList");
       const actBadge = document.getElementById("actBadge");
       const flashEl = document.getElementById("flash");
@@ -685,7 +664,6 @@
       function tick() {
         document.getElementById("scNow").textContent = fmt(new Date());
       }
-
       function fmt(d) {
         return d.toLocaleTimeString("en-GB", {
           hour: "2-digit",
@@ -694,15 +672,14 @@
         });
       }
 
-      function logIncident(type, label, amount) {
-        // Wiring in revenue engine from revenue.js
-        const fares = getCurrentFares();
-        const incidentMin = fares.min * amount;
-        const incidentMax = fares.max * amount;
+      function logIncident(type, label, amount, btnElement) {
+        const fares = getCurrentFares(); // From revenue.js
+        const minVal = fares.min * amount;
+        const maxVal = fares.max * amount;
 
         count += amount;
-        totalMin += incidentMin;
-        totalMax += incidentMax;
+        totalMin += minVal;
+        totalMax += maxVal;
 
         incidents.unshift({
           time: new Date(),
@@ -710,14 +687,14 @@
           label,
           amount,
           fareLabel: fares.label,
-          incidentMin,
-          incidentMax,
+          minVal,
+          maxVal,
         });
 
         refreshCounter();
         refreshList();
         triggerFlash();
-        addRipple(recordBtn);
+        if (btnElement) addRipple(btnElement);
         saveData();
       }
 
@@ -739,25 +716,26 @@
       }
 
       function refreshList() {
-        actBadge.textContent = `${incidents.length} Entr${incidents.length === 1 ? "y" : "ies"}`;
-        const shown = incidents.slice(0, 6);
-        if (!shown.length) {
-          activityList.innerHTML = `<div class="empty-state">No incidents logged yet.<br>Tap <strong>Record Incident</strong> to begin.</div>`;
+        actBadge.textContent = `${incidents.length} Entries`;
+        if (!incidents.length) {
+          activityList.innerHTML = `<div class="empty-state">Standing by for gate-line input...</div>`;
           return;
         }
-        activityList.innerHTML = shown
+        activityList.innerHTML = incidents
+          .slice(0, 6)
           .map(
             (i) => `
-      <div class="activity-item">
-        <div class="act-left">
-          <div class="type-bar ${i.type === "single" ? "bar-single" : "bar-group"}"></div>
-          <div>
-            <div class="act-type">${i.label}</div>
-            <div class="act-detail">${i.amount > 1 ? i.amount + " people" : "1 person"}</div>
+          <div class="activity-item">
+            <div class="act-left">
+              <div class="type-bar bar-${i.type}"></div>
+              <div>
+                <div class="act-type">${i.label}</div>
+                <div class="act-detail">${i.amount > 1 ? i.amount + " people" : "1 person"} · ${i.fareLabel}</div>
+              </div>
+            </div>
+            <div class="act-time">${fmt(i.time)}</div>
           </div>
-        </div>
-        <div class="act-time">${fmt(i.time)}</div>
-      </div>`,
+        `,
           )
           .join("");
       }
@@ -768,7 +746,6 @@
       }
 
       function addRipple(btn) {
-        if (!btn) return;
         const r = document.createElement("span");
         r.className = "ripple";
         const s = Math.max(btn.offsetWidth, btn.offsetHeight);
@@ -777,63 +754,68 @@
         setTimeout(() => r.remove(), 600);
       }
 
-      let toastTimer;
       function showToast(msg) {
         toastEl.textContent = msg;
         toastEl.classList.add("show");
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+        setTimeout(() => toastEl.classList.remove("show"), 2200);
       }
 
-      recordBtn.addEventListener("click", () =>
-        logIncident("single", "Single Entry", 1),
-      );
+      // ── Event Listeners ──
+      document
+        .getElementById("doubleGateBtn")
+        .addEventListener("click", function () {
+          logIncident("double-gate", "Double Gate", 1, this);
+        });
 
-      groupBtn.addEventListener("click", () => {
-        const n = parseInt(prompt("How many in the group?"));
-        if (!isNaN(n) && n > 0) {
-          logIncident("group", "Group Entry", n);
-          showToast(`Group of ${n} logged`);
-        }
-      });
+      document
+        .getElementById("pushThroughBtn")
+        .addEventListener("click", function () {
+          logIncident("push-through", "Push Through", 1, this);
+        });
 
-      undoBtn.addEventListener("click", () => {
+      document
+        .getElementById("groupBtn")
+        .addEventListener("click", function () {
+          const n = parseInt(prompt("How many in the group?"));
+          if (!isNaN(n) && n > 0) {
+            logIncident("other", "Group Entry", n, this);
+            showToast(`Group of ${n} logged`);
+          }
+        });
+
+      document.getElementById("undoBtn").addEventListener("click", () => {
         if (!incidents.length) {
           showToast("Nothing to undo");
           return;
         }
         const last = incidents.shift();
-
-        // Strategic state reduction
         count = Math.max(0, count - last.amount);
-        totalMin = Math.max(0, totalMin - (last.incidentMin || 0));
-        totalMax = Math.max(0, totalMax - (last.incidentMax || 0));
-
+        totalMin = Math.max(0, totalMin - (last.minVal || 0));
+        totalMax = Math.max(0, totalMax - (last.maxVal || 0));
         refreshCounter();
         refreshList();
         showToast(`Removed: ${last.label}`);
         saveData();
       });
 
-      endBtn.addEventListener("click", () => {
+      document.getElementById("endBtn").addEventListener("click", () => {
         if (!count) {
           showToast("No incidents recorded");
           return;
         }
         if (
           confirm(
-            `End shift?\n\nTotal incidents: ${count}\n\nThis will reset the counter.`,
+            `End shift?\n\nTotal: ${count}\nEst. Leak: £${totalMin.toFixed(2)}-£${totalMax.toFixed(2)}`,
           )
         ) {
-          showToast(`Shift complete — ${count} incidents saved`);
           count = 0;
           totalMin = 0;
           totalMax = 0;
           incidents = [];
           localStorage.removeItem("rapidReport");
-
           refreshCounter();
           refreshList();
+          showToast("Shift Data Cleared");
         }
       });
     </script>

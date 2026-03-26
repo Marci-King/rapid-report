@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#003b8e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="manifest.json" />
     <title>Rapid Report — Gate Evasion Counter</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700&display=swap"
@@ -49,7 +52,7 @@
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
       }
 
-      /* Header & UI Components */
+      /* Header */
       .tfl-header {
         background: var(--tfl-blue);
       }
@@ -113,7 +116,7 @@
         background: var(--tfl-red);
       }
 
-      /* Shift Strip & Counters */
+      /* Shift Strip */
       .shift-strip {
         background: var(--tfl-blue-dark);
         display: grid;
@@ -138,6 +141,8 @@
         font-weight: 700;
         color: white;
       }
+
+      /* Counter */
       .counter-block {
         padding: 24px 20px 18px;
         text-align: center;
@@ -168,7 +173,7 @@
         text-transform: uppercase;
       }
 
-      /* 80/20 Incident Grid */
+      /* Incident Grid */
       .incident-grid {
         padding: 12px;
         display: grid;
@@ -231,7 +236,36 @@
         margin-top: 4px;
       }
 
-      /* Activity List */
+      /* Undo */
+      .undo-row {
+        border-bottom: 1px solid var(--border-light);
+      }
+      .act-btn {
+        width: 100%;
+        background: var(--white);
+        border: none;
+        padding: 14px 16px;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .act-btn:active {
+        background: #eef3ff;
+      }
+      .act-label {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--tfl-blue);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      /* Activity */
       .sec-header {
         background: var(--tfl-blue);
         color: white;
@@ -306,8 +340,15 @@
         font-weight: 600;
         color: var(--text-muted);
       }
+      .empty-state {
+        padding: 28px 20px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        line-height: 1.7;
+      }
 
-      /* Modal Styles */
+      /* Modal */
       .modal-overlay {
         position: fixed;
         inset: 0;
@@ -405,6 +446,20 @@
         color: var(--tfl-red);
         line-height: 1;
       }
+      .mrb-sub {
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        margin-top: 5px;
+        text-transform: uppercase;
+      }
+      .modal-section-label {
+        padding: 8px 18px 4px;
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
       .breakdown-table {
         width: 100%;
         border-collapse: collapse;
@@ -460,6 +515,21 @@
         text-align: center;
         border-right: 1px solid var(--border-light);
       }
+      .peak-cell:last-child {
+        border-right: none;
+      }
+      .pc-label {
+        font-size: 0.58rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 4px;
+      }
+      .pc-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--tfl-blue);
+      }
       .modal-actions {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -479,6 +549,10 @@
         background: var(--tfl-blue);
         color: white;
       }
+      .modal-btn.discard {
+        background: #f0f0f0;
+        color: var(--text-muted);
+      }
       .am-note {
         margin: 0 18px 4px;
         padding: 8px 12px;
@@ -489,7 +563,19 @@
         line-height: 1.5;
       }
 
-      /* Utils */
+      /* Status bar & utils */
+      .ejm-bar {
+        background: var(--tfl-blue);
+        padding: 5px 16px;
+        text-align: right;
+      }
+      .ejm-text {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
       .status-bar {
         background: #1a1a1a;
         padding: 8px 16px;
@@ -517,6 +603,9 @@
         font-weight: 700;
         text-transform: uppercase;
         cursor: pointer;
+      }
+      .end-btn:active {
+        background: var(--tfl-red-dark);
       }
       .toast {
         position: fixed;
@@ -570,6 +659,7 @@
     <div class="flash" id="flash"></div>
     <div class="toast" id="toast"></div>
 
+    <!-- Modal -->
     <div class="modal-overlay" id="modalOverlay">
       <div class="modal">
         <div class="modal-header">
@@ -591,7 +681,6 @@
             <div class="modal-meta-item">End<span id="mEnd">—</span></div>
           </div>
         </div>
-
         <div class="modal-revenue-block">
           <div class="mrb-label">Estimated Revenue Leakage This Shift</div>
           <div class="mrb-range" id="mRevRange">£0.00 – £0.00</div>
@@ -600,10 +689,8 @@
             <span id="mFareBand">—</span> conditions
           </div>
         </div>
-
         <div class="modal-section-label">Incident Breakdown</div>
         <table class="breakdown-table" id="breakdownTable"></table>
-
         <div class="peak-strip">
           <div class="peak-cell">
             <div class="pc-label">Peak Incidents</div>
@@ -614,9 +701,7 @@
             <div class="pc-value" id="mOffPeakCount">0</div>
           </div>
         </div>
-
         <div class="am-note" id="amNote"></div>
-
         <div class="modal-actions">
           <button class="modal-btn discard" id="modalDiscard">
             Discard & Reset
@@ -628,6 +713,7 @@
       </div>
     </div>
 
+    <!-- App -->
     <div class="app">
       <div class="tfl-header">
         <div class="tfl-header-top">
@@ -650,9 +736,7 @@
             </svg>
             <div>
               <div class="header-title">Rapid Report</div>
-              <div class="header-sub">
-                Operational Intelligence · Milestone 4
-              </div>
+              <div class="header-sub">Operational Intelligence · PWA v2.2</div>
             </div>
           </div>
           <div class="live-pill">
@@ -721,11 +805,15 @@
       </div>
 
       <div class="sec-header">
-        <span>Live Audit Trail</span
-        ><span class="sec-badge" id="actBadge">0 Entries</span>
+        <span>Live Audit Trail</span>
+        <span class="sec-badge" id="actBadge">0 Entries</span>
       </div>
       <div class="activity-list" id="activityList">
         <div class="empty-state">Standing by for gate-line input...</div>
+      </div>
+
+      <div class="ejm-bar">
+        <span class="ejm-text">Every Journey Matters</span>
       </div>
 
       <div class="status-bar">
@@ -738,6 +826,16 @@
     </div>
 
     <script>
+      // ── Service Worker Registration ──
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./sw.js")
+            .then(() => console.log("[RR] Service worker registered"))
+            .catch((err) => console.warn("[RR] SW registration failed:", err));
+        });
+      }
+
       let count = 0,
         incidents = [],
         totalMin = 0,
@@ -745,10 +843,10 @@
       const shiftStart = new Date(),
         STATION = "Canning Town";
 
-      const counterNum = document.getElementById("counterNum"),
-        activityList = document.getElementById("activityList"),
-        actBadge = document.getElementById("actBadge"),
-        modalOverlay = document.getElementById("modalOverlay");
+      const counterNum = document.getElementById("counterNum");
+      const activityList = document.getElementById("activityList");
+      const actBadge = document.getElementById("actBadge");
+      const modalOverlay = document.getElementById("modalOverlay");
 
       function tick() {
         document.getElementById("scNow").textContent =
@@ -795,20 +893,29 @@
             `£${totalMin.toFixed(2)}`;
           document.getElementById("revMax").textContent =
             `£${totalMax.toFixed(2)}`;
-        } else revEl.style.display = "none";
-        if (!incidents.length)
+        } else {
+          revEl.style.display = "none";
+        }
+        if (!incidents.length) {
           activityList.innerHTML = `<div class="empty-state">Standing by for gate-line input...</div>`;
-        else
+        } else {
           activityList.innerHTML = incidents
             .slice(0, 6)
             .map(
               (i) => `
-          <div class="activity-item">
-            <div class="act-left"><div class="type-bar bar-${i.type}"></div><div><div class="act-type">${i.label}</div><div class="act-detail">${i.amount} person(s) · ${i.isPeakIncident ? "Peak" : "Off-Peak"}</div></div></div>
-            <div class="act-time">${fmtShort(new Date(i.time))}</div>
-          </div>`,
+            <div class="activity-item">
+              <div class="act-left">
+                <div class="type-bar bar-${i.type}"></div>
+                <div>
+                  <div class="act-type">${i.label}</div>
+                  <div class="act-detail">${i.amount} person(s) · ${i.isPeakIncident ? "Peak" : "Off-Peak"}</div>
+                </div>
+              </div>
+              <div class="act-time">${fmtShort(new Date(i.time))}</div>
+            </div>`,
             )
             .join("");
+        }
       }
 
       function buildSummary() {
@@ -818,7 +925,6 @@
         document.getElementById("mEnd").textContent = fmtShort(now);
         document.getElementById("mRevRange").textContent =
           `£${totalMin.toFixed(2)} – £${totalMax.toFixed(2)}`;
-
         const peakCount = incidents.filter((i) => i.isPeakIncident).length;
         const offPeakCount = incidents.length - peakCount;
         document.getElementById("mPeakCount").textContent = peakCount;
@@ -829,7 +935,6 @@
             : peakCount > 0
               ? "Peak"
               : "Off-Peak";
-
         const types = {
           "double-gate": {
             name: "Double Gate",
@@ -845,25 +950,24 @@
           },
           other: { name: "Group Entry", dot: "dot-other", count: 0, min: 0 },
         };
-
         incidents.forEach((i) => {
           if (types[i.type]) {
             types[i.type].count += i.amount;
             types[i.type].min += i.minVal;
           }
         });
-
         document.getElementById("breakdownTable").innerHTML =
           Object.values(types)
             .filter((t) => t.count > 0)
             .map(
               (t) => `
-          <tr><td><div class="bt-type"><div class="bt-dot ${t.dot}"></div><span class="bt-name">${t.name}</span></div></td><td class="bt-count">${t.count}</td><td class="bt-rev">£${t.min.toFixed(2)}+</td></tr>
-        `,
+            <tr>
+              <td><div class="bt-type"><div class="bt-dot ${t.dot}"></div><span class="bt-name">${t.name}</span></div></td>
+              <td class="bt-count">${t.count}</td>
+              <td class="bt-rev">£${t.min.toFixed(2)}+</td>
+            </tr>`,
             )
-            .join("") || '<tr><td colspan="3">No incidents</td></tr>';
-
-        // Safeguard for division by zero
+            .join("") || `<tr><td colspan="3">No incidents</td></tr>`;
         const timeDiff = Math.max(1, (now - shiftStart) / 3600000);
         const rate = (incidents.length / timeDiff).toFixed(1);
         document.getElementById("amNote").textContent =
@@ -915,7 +1019,6 @@
           totalMin = saved.totalMin || 0;
           totalMax = saved.totalMax || 0;
           incidents = saved.incidents || [];
-          refreshUI();
         }
       }
 

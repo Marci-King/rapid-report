@@ -8,6 +8,8 @@
       href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
+    <script src="revenue.js"></script>
+
     <style>
       *,
       *::before,
@@ -188,6 +190,15 @@
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-top: 4px;
+      }
+
+      .revenue-range {
+        margin-top: 12px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--tfl-red);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
       }
 
       /* ── Record button ── */
@@ -509,7 +520,6 @@
     <div class="toast" id="toast"></div>
 
     <div class="app">
-      <!-- Header -->
       <div class="tfl-header">
         <div class="tfl-header-top">
           <div class="header-brand">
@@ -542,7 +552,6 @@
         <div class="red-bar"></div>
       </div>
 
-      <!-- Shift strip -->
       <div class="shift-strip">
         <div class="shift-cell">
           <div class="sc-label">Station</div>
@@ -562,14 +571,16 @@
         </div>
       </div>
 
-      <!-- Counter -->
       <div class="counter-block">
         <div class="counter-label">Total Incidents This Shift</div>
         <div class="counter-num" id="counterNum">0</div>
-        <div class="counter-sub">Double Gates Recorded</div>
+        <div class="counter-sub">Incidents Recorded</div>
+        <div class="revenue-range" id="revenueRange" style="display: none">
+          Revenue at Risk: <span id="revMin">£0.00</span> –
+          <span id="revMax">£0.00</span>
+        </div>
       </div>
 
-      <!-- Record button -->
       <div class="main-btn-wrap">
         <button class="record-btn" id="recordBtn">
           <div class="record-btn-inner">
@@ -580,7 +591,6 @@
         </button>
       </div>
 
-      <!-- Action row -->
       <div class="action-row">
         <button class="act-btn" id="groupBtn">
           <div class="act-icon">👥</div>
@@ -594,7 +604,6 @@
         </button>
       </div>
 
-      <!-- Activity -->
       <div class="sec-header">
         <span>Recent Activity</span>
         <span class="sec-badge" id="actBadge">0 Entries</span>
@@ -606,12 +615,10 @@
         </div>
       </div>
 
-      <!-- EJM -->
       <div class="ejm-bar">
         <span class="ejm-text">Every Journey Matters</span>
       </div>
 
-      <!-- Status bar -->
       <div class="status-bar">
         <div class="sb-left">
           Logged in as <span>Marci</span> &nbsp;·&nbsp;
@@ -624,6 +631,8 @@
     <script>
       let count = 0;
       let incidents = [];
+      let totalMin = 0;
+      let totalMax = 0;
       const shiftStart = new Date();
       const STATION = "My Station";
 
@@ -649,7 +658,9 @@
 
       function saveData() {
         const data = {
-          count: count,
+          count,
+          totalMin,
+          totalMax,
           incidents: incidents.map((i) => ({
             ...i,
             time: i.time.toISOString(),
@@ -662,7 +673,9 @@
         const saved = localStorage.getItem("rapidReport");
         if (!saved) return;
         const data = JSON.parse(saved);
-        count = data.count;
+        count = data.count || 0;
+        totalMin = data.totalMin || 0;
+        totalMax = data.totalMax || 0;
         incidents = data.incidents.map((i) => ({
           ...i,
           time: new Date(i.time),
@@ -682,8 +695,25 @@
       }
 
       function logIncident(type, label, amount) {
+        // Wiring in revenue engine from revenue.js
+        const fares = getCurrentFares();
+        const incidentMin = fares.min * amount;
+        const incidentMax = fares.max * amount;
+
         count += amount;
-        incidents.unshift({ time: new Date(), type, label, amount });
+        totalMin += incidentMin;
+        totalMax += incidentMax;
+
+        incidents.unshift({
+          time: new Date(),
+          type,
+          label,
+          amount,
+          fareLabel: fares.label,
+          incidentMin,
+          incidentMax,
+        });
+
         refreshCounter();
         refreshList();
         triggerFlash();
@@ -695,6 +725,17 @@
         counterNum.textContent = count;
         counterNum.classList.add("bump");
         setTimeout(() => counterNum.classList.remove("bump"), 100);
+
+        const rangeEl = document.getElementById("revenueRange");
+        if (count > 0) {
+          document.getElementById("revMin").textContent =
+            `£${totalMin.toFixed(2)}`;
+          document.getElementById("revMax").textContent =
+            `£${totalMax.toFixed(2)}`;
+          rangeEl.style.display = "block";
+        } else {
+          rangeEl.style.display = "none";
+        }
       }
 
       function refreshList() {
@@ -727,6 +768,7 @@
       }
 
       function addRipple(btn) {
+        if (!btn) return;
         const r = document.createElement("span");
         r.className = "ripple";
         const s = Math.max(btn.offsetWidth, btn.offsetHeight);
@@ -761,7 +803,12 @@
           return;
         }
         const last = incidents.shift();
+
+        // Strategic state reduction
         count = Math.max(0, count - last.amount);
+        totalMin = Math.max(0, totalMin - (last.incidentMin || 0));
+        totalMax = Math.max(0, totalMax - (last.incidentMax || 0));
+
         refreshCounter();
         refreshList();
         showToast(`Removed: ${last.label}`);
@@ -780,6 +827,8 @@
         ) {
           showToast(`Shift complete — ${count} incidents saved`);
           count = 0;
+          totalMin = 0;
+          totalMax = 0;
           incidents = [];
           localStorage.removeItem("rapidReport");
 

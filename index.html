@@ -18,7 +18,6 @@
         margin: 0;
         padding: 0;
       }
-
       :root {
         --tfl-blue: #003b8e;
         --tfl-blue-dark: #00286a;
@@ -40,7 +39,6 @@
         color: var(--text);
         font-family: "Overpass", Arial, sans-serif;
       }
-
       .app {
         max-width: 480px;
         margin: 0 auto;
@@ -51,43 +49,37 @@
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
       }
 
-      /* ── Header ── */
+      /* Header & UI Components */
       .tfl-header {
         background: var(--tfl-blue);
       }
-
       .tfl-header-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 12px 16px;
       }
-
       .header-brand {
         display: flex;
         align-items: center;
         gap: 10px;
       }
-
       .roundel {
         width: 42px;
         height: 42px;
         flex-shrink: 0;
       }
-
       .header-title {
         color: white;
         font-size: 1.05rem;
         font-weight: 700;
       }
-
       .header-sub {
         color: rgba(255, 255, 255, 0.7);
         font-size: 0.68rem;
         margin-top: 1px;
         letter-spacing: 0.03em;
       }
-
       .live-pill {
         display: flex;
         align-items: center;
@@ -98,10 +90,8 @@
         font-size: 0.65rem;
         font-weight: 700;
         color: white;
-        letter-spacing: 0.1em;
         text-transform: uppercase;
       }
-
       .live-dot {
         width: 6px;
         height: 6px;
@@ -109,7 +99,6 @@
         background: #7fff7f;
         animation: blink 1.5s ease infinite;
       }
-
       @keyframes blink {
         0%,
         100% {
@@ -119,90 +108,67 @@
           opacity: 0.3;
         }
       }
-
       .red-bar {
         height: 4px;
         background: var(--tfl-red);
       }
 
-      /* ── Shift strip ── */
+      /* Shift Strip & Counters */
       .shift-strip {
         background: var(--tfl-blue-dark);
         display: grid;
         grid-template-columns: repeat(4, 1fr);
       }
-
       .shift-cell {
         padding: 8px 6px;
         text-align: center;
         border-right: 1px solid rgba(255, 255, 255, 0.1);
       }
-
       .shift-cell:last-child {
         border-right: none;
       }
-
       .sc-label {
         font-size: 0.56rem;
         color: rgba(255, 255, 255, 0.55);
         text-transform: uppercase;
-        letter-spacing: 0.08em;
         margin-bottom: 2px;
       }
-
       .sc-value {
         font-size: 0.76rem;
         font-weight: 700;
         color: white;
       }
-
-      /* ── Counter ── */
       .counter-block {
         padding: 24px 20px 18px;
         text-align: center;
         border-bottom: 1px solid var(--border-light);
         background: var(--white);
       }
-
       .counter-label {
         font-size: 0.68rem;
         color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.1em;
         margin-bottom: 4px;
       }
-
       .counter-num {
         font-size: 6rem;
         font-weight: 700;
         color: var(--tfl-blue);
         line-height: 1;
-        letter-spacing: -0.02em;
         transition: transform 0.08s ease;
       }
-
       .counter-num.bump {
         transform: scale(1.06);
       }
-
-      .counter-sub {
-        font-size: 0.68rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-top: 4px;
-      }
-
       .revenue-range {
         margin-top: 12px;
         font-size: 0.78rem;
         font-weight: 700;
         color: var(--tfl-red);
-        letter-spacing: 0.04em;
         text-transform: uppercase;
       }
 
-      /* ── 80/20 Thumb-Memory Grid ── */
+      /* 80/20 Incident Grid */
       .incident-grid {
         padding: 12px;
         display: grid;
@@ -211,7 +177,6 @@
         background: var(--white);
         border-bottom: 1px solid var(--border-light);
       }
-
       .inc-btn {
         border: none;
         border-radius: 4px;
@@ -222,11 +187,9 @@
         -webkit-tap-highlight-color: transparent;
         transition: transform 0.05s;
       }
-
       .inc-btn:active {
         transform: translateY(3px);
       }
-
       .inc-btn-inner {
         display: flex;
         flex-direction: column;
@@ -235,13 +198,18 @@
         padding: 20px 10px;
         pointer-events: none;
       }
-
       .inc-btn.primary {
         height: 110px;
         background: var(--tfl-blue);
         box-shadow: 0 5px 0 var(--tfl-blue-dark);
       }
-
+      .inc-btn.push-through {
+        background: var(--tfl-red);
+        box-shadow: 0 5px 0 var(--tfl-red-dark);
+      }
+      .inc-btn.push-through:active {
+        background: var(--tfl-red-dark);
+      }
       .inc-btn.secondary {
         grid-column: span 2;
         height: 65px;
@@ -249,7 +217,6 @@
         box-shadow: 0 4px 0 #000;
         margin-top: 5px;
       }
-
       .inc-label {
         font-size: 0.95rem;
         font-weight: 700;
@@ -264,55 +231,7 @@
         margin-top: 4px;
       }
 
-      .ripple {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.22);
-        transform: scale(0);
-        animation: rpl 0.5s ease-out forwards;
-        pointer-events: none;
-      }
-
-      @keyframes rpl {
-        to {
-          transform: scale(4);
-          opacity: 0;
-        }
-      }
-
-      /* ── Action/Undo row ── */
-      .undo-row {
-        border-bottom: 1px solid var(--border-light);
-      }
-
-      .act-btn {
-        width: 100%;
-        background: var(--white);
-        border: none;
-        padding: 14px 16px;
-        cursor: pointer;
-        text-align: center;
-        transition: background 0.1s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      .act-btn:active {
-        background: #eef3ff;
-      }
-
-      .act-label {
-        font-size: 0.76rem;
-        font-weight: 700;
-        color: var(--tfl-blue);
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-      }
-
-      /* ── Recent Activity ── */
+      /* Activity List */
       .sec-header {
         background: var(--tfl-blue);
         color: white;
@@ -320,24 +239,20 @@
         font-size: 0.68rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
-
       .sec-badge {
         background: rgba(255, 255, 255, 0.18);
         padding: 2px 8px;
         border-radius: 2px;
         font-size: 0.62rem;
       }
-
       .activity-list {
         background: var(--white);
         flex: 1;
       }
-
       .activity-item {
         display: flex;
         align-items: center;
@@ -346,7 +261,6 @@
         border-bottom: 1px solid var(--border-light);
         animation: fadeIn 0.18s ease;
       }
-
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -357,7 +271,11 @@
           background: transparent;
         }
       }
-
+      .act-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
       .type-bar {
         width: 4px;
         height: 34px;
@@ -373,12 +291,10 @@
       .bar-other {
         background: #2c2c2c;
       }
-
       .act-type {
         font-size: 0.82rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
       }
       .act-detail {
         font-size: 0.65rem;
@@ -389,31 +305,191 @@
         font-size: 0.8rem;
         font-weight: 600;
         color: var(--text-muted);
-        font-variant-numeric: tabular-nums;
       }
 
-      .empty-state {
-        padding: 28px 20px;
-        text-align: center;
-        color: var(--text-muted);
-        font-size: 0.8rem;
-        line-height: 1.7;
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.72);
+        z-index: 1000;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
       }
-
-      /* ── Bottom Bar ── */
-      .ejm-bar {
+      .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: var(--white);
+        width: 100%;
+        max-width: 480px;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+        transform: translateY(40px);
+        transition: transform 0.28s ease;
+      }
+      .modal-overlay.open .modal {
+        transform: translateY(0);
+      }
+      .modal-header {
         background: var(--tfl-blue);
-        padding: 5px 16px;
-        text-align: right;
+        padding: 14px 18px 10px;
       }
-      .ejm-text {
-        font-size: 0.6rem;
+      .modal-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .modal-title {
+        color: white;
+        font-size: 0.9rem;
         font-weight: 700;
-        color: rgba(255, 255, 255, 0.6);
         text-transform: uppercase;
-        letter-spacing: 0.14em;
+        letter-spacing: 0.06em;
+      }
+      .modal-subtitle {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.62rem;
+        margin-top: 3px;
+        text-transform: uppercase;
+      }
+      .modal-close {
+        background: rgba(255, 255, 255, 0.15);
+        border: none;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      .modal-meta {
+        display: flex;
+        gap: 16px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .modal-meta-item {
+        font-size: 0.6rem;
+        color: rgba(255, 255, 255, 0.55);
+        text-transform: uppercase;
+      }
+      .modal-meta-item span {
+        display: block;
+        color: white;
+        font-weight: 700;
+        font-size: 0.72rem;
+        margin-top: 2px;
+      }
+      .modal-revenue-block {
+        background: #fafafa;
+        border-bottom: 1px solid var(--border-light);
+        padding: 16px 18px;
+        text-align: center;
+      }
+      .mrb-label {
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .mrb-range {
+        font-size: 1.9rem;
+        font-weight: 700;
+        color: var(--tfl-red);
+        line-height: 1;
+      }
+      .breakdown-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .breakdown-table td {
+        padding: 9px 18px;
+        font-size: 0.78rem;
+        border-bottom: 1px solid var(--border-light);
+      }
+      .bt-type {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .bt-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .dot-double-gate {
+        background: var(--tfl-blue);
+      }
+      .dot-push-through {
+        background: var(--tfl-red);
+      }
+      .dot-other {
+        background: #2c2c2c;
+      }
+      .bt-name {
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .bt-count {
+        text-align: right;
+        font-weight: 700;
+        color: var(--tfl-blue);
+      }
+      .bt-rev {
+        text-align: right;
+        font-size: 0.68rem;
+        color: var(--tfl-red);
+        font-weight: 700;
+      }
+      .peak-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-top: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--border-light);
+      }
+      .peak-cell {
+        padding: 12px 18px;
+        text-align: center;
+        border-right: 1px solid var(--border-light);
+      }
+      .modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 14px 18px 20px;
+      }
+      .modal-btn {
+        border: none;
+        border-radius: 3px;
+        padding: 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .modal-btn.confirm {
+        background: var(--tfl-blue);
+        color: white;
+      }
+      .am-note {
+        margin: 0 18px 4px;
+        padding: 8px 12px;
+        background: #fffbe6;
+        border-left: 3px solid var(--tfl-yellow);
+        font-size: 0.62rem;
+        color: #5a4a00;
+        line-height: 1.5;
       }
 
+      /* Utils */
       .status-bar {
         background: #1a1a1a;
         padding: 8px 16px;
@@ -423,7 +499,6 @@
         position: sticky;
         bottom: 0;
       }
-
       .sb-left {
         font-size: 0.65rem;
         color: rgba(255, 255, 255, 0.55);
@@ -432,7 +507,6 @@
         color: white;
         font-weight: 600;
       }
-
       .end-btn {
         background: var(--tfl-red);
         color: white;
@@ -444,12 +518,6 @@
         text-transform: uppercase;
         cursor: pointer;
       }
-
-      .end-btn:active {
-        background: var(--tfl-red-dark);
-      }
-
-      /* ── Utils ── */
       .toast {
         position: fixed;
         bottom: 56px;
@@ -470,7 +538,6 @@
         opacity: 1;
         transform: translateX(-50%) translateY(0);
       }
-
       .flash {
         position: fixed;
         inset: 0;
@@ -483,11 +550,83 @@
       .flash.show {
         opacity: 1;
       }
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.22);
+        transform: scale(0);
+        animation: rpl 0.5s ease-out forwards;
+        pointer-events: none;
+      }
+      @keyframes rpl {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="flash" id="flash"></div>
     <div class="toast" id="toast"></div>
+
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-header-top">
+            <div>
+              <div class="modal-title">Shift Intelligence Report</div>
+              <div class="modal-subtitle">
+                Area Manager View · Auto-generated
+              </div>
+            </div>
+            <button class="modal-close" id="modalClose">Close</button>
+          </div>
+          <div class="modal-meta">
+            <div class="modal-meta-item">
+              Station<span id="mStation">—</span>
+            </div>
+            <div class="modal-meta-item">Staff<span>Marci</span></div>
+            <div class="modal-meta-item">Start<span id="mStart">—</span></div>
+            <div class="modal-meta-item">End<span id="mEnd">—</span></div>
+          </div>
+        </div>
+
+        <div class="modal-revenue-block">
+          <div class="mrb-label">Estimated Revenue Leakage This Shift</div>
+          <div class="mrb-range" id="mRevRange">£0.00 – £0.00</div>
+          <div class="mrb-sub">
+            Based on TfL fare schedule ·
+            <span id="mFareBand">—</span> conditions
+          </div>
+        </div>
+
+        <div class="modal-section-label">Incident Breakdown</div>
+        <table class="breakdown-table" id="breakdownTable"></table>
+
+        <div class="peak-strip">
+          <div class="peak-cell">
+            <div class="pc-label">Peak Incidents</div>
+            <div class="pc-value" id="mPeakCount">0</div>
+          </div>
+          <div class="peak-cell">
+            <div class="pc-label">Off-Peak Incidents</div>
+            <div class="pc-value" id="mOffPeakCount">0</div>
+          </div>
+        </div>
+
+        <div class="am-note" id="amNote"></div>
+
+        <div class="modal-actions">
+          <button class="modal-btn discard" id="modalDiscard">
+            Discard & Reset
+          </button>
+          <button class="modal-btn confirm" id="modalConfirm">
+            Confirm & Sync
+          </button>
+        </div>
+      </div>
+    </div>
 
     <div class="app">
       <div class="tfl-header">
@@ -512,7 +651,7 @@
             <div>
               <div class="header-title">Rapid Report</div>
               <div class="header-sub">
-                Operational Intelligence · Milestone 3
+                Operational Intelligence · Milestone 4
               </div>
             </div>
           </div>
@@ -560,21 +699,12 @@
             <div class="inc-sub">Tailgate · 1 Person</div>
           </div>
         </button>
-
-        <button
-          class="inc-btn primary"
-          id="pushThroughBtn"
-          style="
-            background: var(--tfl-red);
-            box-shadow: 0 5px 0 var(--tfl-red-dark);
-          "
-        >
+        <button class="inc-btn primary push-through" id="pushThroughBtn">
           <div class="inc-btn-inner">
             <div class="inc-label">Push Through</div>
             <div class="inc-sub">Forced · 1 Person</div>
           </div>
         </button>
-
         <button class="inc-btn secondary" id="groupBtn">
           <div class="inc-btn-inner">
             <div class="inc-label">Group Entry</div>
@@ -591,20 +721,16 @@
       </div>
 
       <div class="sec-header">
-        <span>Live Audit Trail</span>
-        <span class="sec-badge" id="actBadge">0 Entries</span>
+        <span>Live Audit Trail</span
+        ><span class="sec-badge" id="actBadge">0 Entries</span>
       </div>
       <div class="activity-list" id="activityList">
         <div class="empty-state">Standing by for gate-line input...</div>
       </div>
 
-      <div class="ejm-bar">
-        <span class="ejm-text">Every Journey Matters</span>
-      </div>
-
       <div class="status-bar">
         <div class="sb-left">
-          System: <span>PWA-v2.1</span> &nbsp;·&nbsp;
+          System: <span>PWA-v2.2</span> &nbsp;·&nbsp;
           <span id="sbStation">—</span>
         </div>
         <button class="end-btn" id="endBtn">End Shift</button>
@@ -612,139 +738,156 @@
     </div>
 
     <script>
-      let count = 0;
-      let incidents = [];
-      let totalMin = 0;
-      let totalMax = 0;
-      const shiftStart = new Date();
-      const STATION = "My Station";
+      let count = 0,
+        incidents = [],
+        totalMin = 0,
+        totalMax = 0;
+      const shiftStart = new Date(),
+        STATION = "Canning Town";
 
-      const counterNum = document.getElementById("counterNum");
-      const activityList = document.getElementById("activityList");
-      const actBadge = document.getElementById("actBadge");
-      const flashEl = document.getElementById("flash");
-      const toastEl = document.getElementById("toast");
-
-      // Init
-      document.getElementById("scStation").textContent = STATION;
-      document.getElementById("sbStation").textContent = STATION;
-      document.getElementById("scStart").textContent = fmt(shiftStart);
-      tick();
-      setInterval(tick, 1000);
-      loadData();
-      refreshCounter();
-      refreshList();
-
-      function saveData() {
-        const data = {
-          count,
-          totalMin,
-          totalMax,
-          incidents: incidents.map((i) => ({
-            ...i,
-            time: i.time.toISOString(),
-          })),
-        };
-        localStorage.setItem("rapidReport", JSON.stringify(data));
-      }
-
-      function loadData() {
-        const saved = localStorage.getItem("rapidReport");
-        if (!saved) return;
-        const data = JSON.parse(saved);
-        count = data.count || 0;
-        totalMin = data.totalMin || 0;
-        totalMax = data.totalMax || 0;
-        incidents = data.incidents.map((i) => ({
-          ...i,
-          time: new Date(i.time),
-        }));
-      }
+      const counterNum = document.getElementById("counterNum"),
+        activityList = document.getElementById("activityList"),
+        actBadge = document.getElementById("actBadge"),
+        modalOverlay = document.getElementById("modalOverlay");
 
       function tick() {
-        document.getElementById("scNow").textContent = fmt(new Date());
+        document.getElementById("scNow").textContent =
+          new Date().toLocaleTimeString("en-GB");
       }
-      function fmt(d) {
+      function fmtShort(d) {
         return d.toLocaleTimeString("en-GB", {
           hour: "2-digit",
           minute: "2-digit",
-          second: "2-digit",
         });
       }
 
-      function logIncident(type, label, amount, btnElement) {
-        const fares = getCurrentFares(); // From revenue.js
-        const minVal = fares.min * amount;
-        const maxVal = fares.max * amount;
-
+      function logIncident(type, label, amount, btn) {
+        const fares = getCurrentFares();
+        const minVal = fares.min * amount,
+          maxVal = fares.max * amount;
         count += amount;
         totalMin += minVal;
         totalMax += maxVal;
-
         incidents.unshift({
           time: new Date(),
           type,
           label,
           amount,
-          fareLabel: fares.label,
+          isPeakIncident: isPeak(),
           minVal,
           maxVal,
         });
-
-        refreshCounter();
-        refreshList();
+        if (btn) addRipple(btn);
         triggerFlash();
-        if (btnElement) addRipple(btnElement);
+        refreshUI();
         saveData();
       }
 
-      function refreshCounter() {
+      function refreshUI() {
         counterNum.textContent = count;
+        actBadge.textContent = `${incidents.length} Entries`;
         counterNum.classList.add("bump");
         setTimeout(() => counterNum.classList.remove("bump"), 100);
-
-        const rangeEl = document.getElementById("revenueRange");
+        const revEl = document.getElementById("revenueRange");
         if (count > 0) {
+          revEl.style.display = "block";
           document.getElementById("revMin").textContent =
             `£${totalMin.toFixed(2)}`;
           document.getElementById("revMax").textContent =
             `£${totalMax.toFixed(2)}`;
-          rangeEl.style.display = "block";
-        } else {
-          rangeEl.style.display = "none";
-        }
-      }
-
-      function refreshList() {
-        actBadge.textContent = `${incidents.length} Entries`;
-        if (!incidents.length) {
+        } else revEl.style.display = "none";
+        if (!incidents.length)
           activityList.innerHTML = `<div class="empty-state">Standing by for gate-line input...</div>`;
-          return;
-        }
-        activityList.innerHTML = incidents
-          .slice(0, 6)
-          .map(
-            (i) => `
+        else
+          activityList.innerHTML = incidents
+            .slice(0, 6)
+            .map(
+              (i) => `
           <div class="activity-item">
-            <div class="act-left">
-              <div class="type-bar bar-${i.type}"></div>
-              <div>
-                <div class="act-type">${i.label}</div>
-                <div class="act-detail">${i.amount > 1 ? i.amount + " people" : "1 person"} · ${i.fareLabel}</div>
-              </div>
-            </div>
-            <div class="act-time">${fmt(i.time)}</div>
-          </div>
+            <div class="act-left"><div class="type-bar bar-${i.type}"></div><div><div class="act-type">${i.label}</div><div class="act-detail">${i.amount} person(s) · ${i.isPeakIncident ? "Peak" : "Off-Peak"}</div></div></div>
+            <div class="act-time">${fmtShort(new Date(i.time))}</div>
+          </div>`,
+            )
+            .join("");
+      }
+
+      function buildSummary() {
+        const now = new Date();
+        document.getElementById("mStation").textContent = STATION;
+        document.getElementById("mStart").textContent = fmtShort(shiftStart);
+        document.getElementById("mEnd").textContent = fmtShort(now);
+        document.getElementById("mRevRange").textContent =
+          `£${totalMin.toFixed(2)} – £${totalMax.toFixed(2)}`;
+
+        const peakCount = incidents.filter((i) => i.isPeakIncident).length;
+        const offPeakCount = incidents.length - peakCount;
+        document.getElementById("mPeakCount").textContent = peakCount;
+        document.getElementById("mOffPeakCount").textContent = offPeakCount;
+        document.getElementById("mFareBand").textContent =
+          peakCount > 0 && offPeakCount > 0
+            ? "Mixed"
+            : peakCount > 0
+              ? "Peak"
+              : "Off-Peak";
+
+        const types = {
+          "double-gate": {
+            name: "Double Gate",
+            dot: "dot-double-gate",
+            count: 0,
+            min: 0,
+          },
+          "push-through": {
+            name: "Push Through",
+            dot: "dot-push-through",
+            count: 0,
+            min: 0,
+          },
+          other: { name: "Group Entry", dot: "dot-other", count: 0, min: 0 },
+        };
+
+        incidents.forEach((i) => {
+          if (types[i.type]) {
+            types[i.type].count += i.amount;
+            types[i.type].min += i.minVal;
+          }
+        });
+
+        document.getElementById("breakdownTable").innerHTML =
+          Object.values(types)
+            .filter((t) => t.count > 0)
+            .map(
+              (t) => `
+          <tr><td><div class="bt-type"><div class="bt-dot ${t.dot}"></div><span class="bt-name">${t.name}</span></div></td><td class="bt-count">${t.count}</td><td class="bt-rev">£${t.min.toFixed(2)}+</td></tr>
         `,
-          )
-          .join("");
+            )
+            .join("") || '<tr><td colspan="3">No incidents</td></tr>';
+
+        // Safeguard for division by zero
+        const timeDiff = Math.max(1, (now - shiftStart) / 3600000);
+        const rate = (incidents.length / timeDiff).toFixed(1);
+        document.getElementById("amNote").textContent =
+          `AM Note: ${count} people recorded over this shift at approx. ${rate}/hr. Consider resource review if rate exceeds 3.0/hr.`;
       }
 
+      function closeModal() {
+        modalOverlay.classList.remove("open");
+      }
+      function resetShift() {
+        count = 0;
+        totalMin = 0;
+        totalMax = 0;
+        incidents = [];
+        localStorage.removeItem("rapidReport");
+        refreshUI();
+      }
       function triggerFlash() {
-        flashEl.classList.add("show");
-        setTimeout(() => flashEl.classList.remove("show"), 150);
+        document.getElementById("flash").classList.add("show");
+        setTimeout(
+          () => document.getElementById("flash").classList.remove("show"),
+          150,
+        );
       }
-
       function addRipple(btn) {
         const r = document.createElement("span");
         r.className = "ripple";
@@ -753,71 +896,71 @@
         btn.appendChild(r);
         setTimeout(() => r.remove(), 600);
       }
-
       function showToast(msg) {
-        toastEl.textContent = msg;
-        toastEl.classList.add("show");
-        setTimeout(() => toastEl.classList.remove("show"), 2200);
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2200);
+      }
+      function saveData() {
+        localStorage.setItem(
+          "rapidReport",
+          JSON.stringify({ count, totalMin, totalMax, incidents }),
+        );
+      }
+      function loadData() {
+        const saved = JSON.parse(localStorage.getItem("rapidReport"));
+        if (saved) {
+          count = saved.count || 0;
+          totalMin = saved.totalMin || 0;
+          totalMax = saved.totalMax || 0;
+          incidents = saved.incidents || [];
+          refreshUI();
+        }
       }
 
-      // ── Event Listeners ──
-      document
-        .getElementById("doubleGateBtn")
-        .addEventListener("click", function () {
-          logIncident("double-gate", "Double Gate", 1, this);
-        });
+      document.getElementById("scStation").textContent = STATION;
+      document.getElementById("sbStation").textContent = STATION;
+      document.getElementById("scStart").textContent = fmtShort(shiftStart);
+      setInterval(tick, 1000);
+      loadData();
+      refreshUI();
 
-      document
-        .getElementById("pushThroughBtn")
-        .addEventListener("click", function () {
-          logIncident("push-through", "Push Through", 1, this);
-        });
-
-      document
-        .getElementById("groupBtn")
-        .addEventListener("click", function () {
-          const n = parseInt(prompt("How many in the group?"));
-          if (!isNaN(n) && n > 0) {
-            logIncident("other", "Group Entry", n, this);
-            showToast(`Group of ${n} logged`);
-          }
-        });
-
-      document.getElementById("undoBtn").addEventListener("click", () => {
-        if (!incidents.length) {
-          showToast("Nothing to undo");
-          return;
-        }
+      document.getElementById("doubleGateBtn").onclick = function () {
+        logIncident("double-gate", "Double Gate", 1, this);
+      };
+      document.getElementById("pushThroughBtn").onclick = function () {
+        logIncident("push-through", "Push Through", 1, this);
+      };
+      document.getElementById("groupBtn").onclick = function () {
+        const n = parseInt(prompt("Group size?"));
+        if (n) logIncident("other", "Group Entry", n, this);
+      };
+      document.getElementById("undoBtn").onclick = () => {
+        if (!incidents.length) return showToast("Nothing to undo");
         const last = incidents.shift();
-        count = Math.max(0, count - last.amount);
-        totalMin = Math.max(0, totalMin - (last.minVal || 0));
-        totalMax = Math.max(0, totalMax - (last.maxVal || 0));
-        refreshCounter();
-        refreshList();
-        showToast(`Removed: ${last.label}`);
+        count -= last.amount;
+        totalMin -= last.minVal;
+        totalMax -= last.maxVal;
+        refreshUI();
         saveData();
-      });
-
-      document.getElementById("endBtn").addEventListener("click", () => {
-        if (!count) {
-          showToast("No incidents recorded");
-          return;
-        }
-        if (
-          confirm(
-            `End shift?\n\nTotal: ${count}\nEst. Leak: £${totalMin.toFixed(2)}-£${totalMax.toFixed(2)}`,
-          )
-        ) {
-          count = 0;
-          totalMin = 0;
-          totalMax = 0;
-          incidents = [];
-          localStorage.removeItem("rapidReport");
-          refreshCounter();
-          refreshList();
-          showToast("Shift Data Cleared");
-        }
-      });
+      };
+      document.getElementById("endBtn").onclick = () => {
+        if (!count) return showToast("No incidents recorded");
+        buildSummary();
+        modalOverlay.classList.add("open");
+      };
+      document.getElementById("modalClose").onclick = closeModal;
+      document.getElementById("modalDiscard").onclick = () => {
+        closeModal();
+        resetShift();
+        showToast("Shift discarded");
+      };
+      document.getElementById("modalConfirm").onclick = () => {
+        closeModal();
+        resetShift();
+        showToast("Shift report synced");
+      };
     </script>
   </body>
 </html>

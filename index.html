@@ -1,0 +1,1510 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#003b8e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="manifest.json" />
+    <title>Rapid Report — Gate Evasion Counter</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="revenue.js"></script>
+    <!-- Local demo only. Never deploy this build with a live Anthropic key. -->
+    <script src="config.local.js"></script>
+
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --transit-blue: #003b8e;
+        --transit-blue-dark: #00286a;
+        --transit-red: #e21836;
+        --transit-red-dark: #b5102a;
+        --transit-yellow: #ffd400;
+        --bg: #f5f5f5;
+        --white: #ffffff;
+        --border: #cccccc;
+        --border-light: #e8e8e8;
+        --text: #1a1a1a;
+        --text-muted: #767676;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Overpass", Arial, sans-serif;
+      }
+      .app {
+        max-width: 480px;
+        margin: 0 auto;
+        min-height: 100vh;
+        background: var(--white);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+      }
+
+      /* Header */
+      .transit-header {
+        background: var(--transit-blue);
+      }
+      .transit-header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+      }
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .roundel {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+      }
+      .header-title {
+        color: white;
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+      .header-sub {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.68rem;
+        margin-top: 1px;
+        letter-spacing: 0.03em;
+      }
+      .live-pill {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 4px 10px;
+        border-radius: 2px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+      }
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #7fff7f;
+        animation: blink 1.5s ease infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .red-bar {
+        height: 4px;
+        background: var(--transit-red);
+      }
+
+      /* Shift Strip */
+      .shift-strip {
+        background: var(--transit-blue-dark);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .shift-cell {
+        padding: 8px 6px;
+        text-align: center;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .shift-cell:last-child {
+        border-right: none;
+      }
+      .sc-label {
+        font-size: 0.56rem;
+        color: rgba(255, 255, 255, 0.55);
+        text-transform: uppercase;
+        margin-bottom: 2px;
+      }
+      .sc-value {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: white;
+      }
+
+      /* Counter */
+      .counter-block {
+        padding: 24px 20px 18px;
+        text-align: center;
+        border-bottom: 1px solid var(--border-light);
+        background: var(--white);
+      }
+      .counter-label {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .counter-num {
+        font-size: 6rem;
+        font-weight: 700;
+        color: var(--transit-blue);
+        line-height: 1;
+        transition: transform 0.08s ease;
+      }
+      .counter-num.bump {
+        transform: scale(1.06);
+      }
+      .revenue-range {
+        margin-top: 12px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--transit-red);
+        text-transform: uppercase;
+      }
+
+      /* Incident Grid */
+      .incident-grid {
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        background: var(--white);
+        border-bottom: 1px solid var(--border-light);
+      }
+      .inc-btn {
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+        -webkit-tap-highlight-color: transparent;
+        transition: transform 0.05s;
+      }
+      .inc-btn:active {
+        transform: translateY(3px);
+      }
+      .inc-btn-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 10px;
+        pointer-events: none;
+      }
+      .inc-btn.primary {
+        height: 110px;
+        background: var(--transit-blue);
+        box-shadow: 0 5px 0 var(--transit-blue-dark);
+      }
+      .inc-btn.push-through {
+        background: var(--transit-red);
+        box-shadow: 0 5px 0 var(--transit-red-dark);
+      }
+      .inc-btn.push-through:active {
+        background: var(--transit-red-dark);
+      }
+      .inc-btn.secondary {
+        grid-column: span 2;
+        height: 65px;
+        background: #2c2c2c;
+        box-shadow: 0 4px 0 #000;
+        margin-top: 5px;
+      }
+      .inc-label {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .inc-sub {
+        font-size: 0.6rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-transform: uppercase;
+        margin-top: 4px;
+      }
+
+      /* Undo */
+      .undo-row {
+        border-bottom: 1px solid var(--border-light);
+      }
+      .act-btn {
+        width: 100%;
+        background: var(--white);
+        border: none;
+        padding: 14px 16px;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .act-btn:active {
+        background: #eef3ff;
+      }
+      .act-label {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--transit-blue);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      /* Activity */
+      .sec-header {
+        background: var(--transit-blue);
+        color: white;
+        padding: 7px 16px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .sec-badge {
+        background: rgba(255, 255, 255, 0.18);
+        padding: 2px 8px;
+        border-radius: 2px;
+        font-size: 0.62rem;
+      }
+      .activity-list {
+        background: var(--white);
+        flex: 1;
+      }
+      .activity-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 16px;
+        border-bottom: 1px solid var(--border-light);
+        animation: fadeIn 0.18s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          background: #eef3ff;
+        }
+        to {
+          opacity: 1;
+          background: transparent;
+        }
+      }
+      .act-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .type-bar {
+        width: 4px;
+        height: 34px;
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
+      .bar-double-gate {
+        background: var(--transit-blue);
+      }
+      .bar-push-through {
+        background: var(--transit-red);
+      }
+      .bar-other {
+        background: #2c2c2c;
+      }
+      .act-type {
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .act-detail {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+      .act-time {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+      .empty-state {
+        padding: 28px 20px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        line-height: 1.7;
+      }
+
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.72);
+        z-index: 1000;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: var(--white);
+        width: 100%;
+        max-width: 480px;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+        transform: translateY(40px);
+        transition: transform 0.28s ease;
+      }
+      .modal-overlay.open .modal {
+        transform: translateY(0);
+      }
+      .modal-header {
+        background: var(--transit-blue);
+        padding: 14px 18px 10px;
+      }
+      .modal-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .modal-title {
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .modal-subtitle {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.62rem;
+        margin-top: 3px;
+        text-transform: uppercase;
+      }
+      .modal-close {
+        background: rgba(255, 255, 255, 0.15);
+        border: none;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      .modal-meta {
+        display: flex;
+        gap: 16px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .modal-meta-item {
+        font-size: 0.6rem;
+        color: rgba(255, 255, 255, 0.55);
+        text-transform: uppercase;
+      }
+      .modal-meta-item span {
+        display: block;
+        color: white;
+        font-weight: 700;
+        font-size: 0.72rem;
+        margin-top: 2px;
+      }
+      .modal-revenue-block {
+        background: #fafafa;
+        border-bottom: 1px solid var(--border-light);
+        padding: 16px 18px;
+        text-align: center;
+      }
+      .mrb-label {
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .mrb-range {
+        font-size: 1.9rem;
+        font-weight: 700;
+        color: var(--transit-red);
+        line-height: 1;
+      }
+      .mrb-sub {
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        margin-top: 5px;
+        text-transform: uppercase;
+      }
+      .modal-section-label {
+        padding: 8px 18px 4px;
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .breakdown-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .breakdown-table td {
+        padding: 9px 18px;
+        font-size: 0.78rem;
+        border-bottom: 1px solid var(--border-light);
+      }
+      .bt-type {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .bt-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .dot-double-gate {
+        background: var(--transit-blue);
+      }
+      .dot-push-through {
+        background: var(--transit-red);
+      }
+      .dot-other {
+        background: #2c2c2c;
+      }
+      .bt-name {
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .bt-count {
+        text-align: right;
+        font-weight: 700;
+        color: var(--transit-blue);
+      }
+      .bt-rev {
+        text-align: right;
+        font-size: 0.68rem;
+        color: var(--transit-red);
+        font-weight: 700;
+      }
+      .peak-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-top: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--border-light);
+      }
+      .peak-cell {
+        padding: 12px 18px;
+        text-align: center;
+        border-right: 1px solid var(--border-light);
+      }
+      .peak-cell:last-child {
+        border-right: none;
+      }
+      .pc-label {
+        font-size: 0.58rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 4px;
+      }
+      .pc-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--transit-blue);
+      }
+      .modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 14px 18px 20px;
+      }
+      .modal-btn {
+        border: none;
+        border-radius: 3px;
+        padding: 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .modal-btn.confirm {
+        background: var(--transit-blue);
+        color: white;
+      }
+      .modal-btn.discard {
+        background: #f0f0f0;
+        color: var(--text-muted);
+      }
+      .am-note {
+        margin: 0 18px 4px;
+        padding: 8px 12px;
+        background: #fffbe6;
+        border-left: 3px solid var(--transit-yellow);
+        font-size: 0.62rem;
+        color: #5a4a00;
+        line-height: 1.5;
+      }
+      .ai-panel {
+        margin: 8px 18px 0;
+        border: 1px solid var(--border-light);
+        background: #fafafa;
+      }
+      .ai-panel-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px;
+        border-bottom: 1px solid var(--border-light);
+      }
+      .ai-panel-title {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--transit-blue);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .ai-panel-subtitle {
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-top: 4px;
+      }
+      .ai-generate-btn {
+        min-width: 138px;
+        padding: 10px 12px;
+      }
+      .modal-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .ai-panel-body {
+        padding: 12px;
+      }
+      .ai-status {
+        font-size: 0.66rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+      .ai-local-note {
+        margin-top: 10px;
+        padding: 8px 10px;
+        background: #fffbe6;
+        border-left: 3px solid var(--transit-yellow);
+        font-size: 0.62rem;
+        color: #5a4a00;
+        line-height: 1.5;
+      }
+      .ai-empty {
+        margin-top: 12px;
+        padding: 12px;
+        background: var(--white);
+        border: 1px solid var(--border-light);
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+      .ai-result {
+        margin-top: 12px;
+        background: var(--white);
+        border: 1px solid var(--border-light);
+      }
+      .ai-field {
+        padding: 12px;
+        border-bottom: 1px solid var(--border-light);
+      }
+      .ai-field:last-child {
+        border-bottom: none;
+      }
+      .ai-field-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 8px;
+      }
+      .ai-summary-text,
+      .ai-action-text {
+        font-size: 0.8rem;
+        line-height: 1.6;
+        color: var(--text);
+      }
+      .ai-observations {
+        list-style: none;
+      }
+      .ai-observations li {
+        position: relative;
+        padding-left: 14px;
+        font-size: 0.78rem;
+        line-height: 1.6;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+      .ai-observations li:last-child {
+        margin-bottom: 0;
+      }
+      .ai-observations li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.55em;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--transit-blue);
+      }
+
+      /* Status bar & utils */
+      .ejm-bar {
+        background: var(--transit-blue);
+        padding: 5px 16px;
+        text-align: right;
+      }
+      .ejm-text {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .status-bar {
+        background: #1a1a1a;
+        padding: 8px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        bottom: 0;
+      }
+      .sb-left {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.55);
+      }
+      .sb-left span {
+        color: white;
+        font-weight: 600;
+      }
+      .end-btn {
+        background: var(--transit-red);
+        color: white;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 2px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .end-btn:active {
+        background: var(--transit-red-dark);
+      }
+      .toast {
+        position: fixed;
+        bottom: 56px;
+        left: 50%;
+        transform: translateX(-50%) translateY(8px);
+        background: #1a1a1a;
+        color: white;
+        padding: 9px 18px;
+        border-radius: 3px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        opacity: 0;
+        transition: all 0.2s ease;
+        z-index: 999;
+        border-left: 4px solid var(--transit-blue);
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .flash {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 59, 142, 0.07);
+        pointer-events: none;
+        opacity: 0;
+        z-index: 500;
+        transition: opacity 0.15s;
+      }
+      .flash.show {
+        opacity: 1;
+      }
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.22);
+        transform: scale(0);
+        animation: rpl 0.5s ease-out forwards;
+        pointer-events: none;
+      }
+      @keyframes rpl {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flash" id="flash"></div>
+    <div class="toast" id="toast"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-header-top">
+            <div>
+              <div class="modal-title">Shift Intelligence Report</div>
+              <div class="modal-subtitle">
+                Operations Review View · Auto-generated
+              </div>
+            </div>
+            <button class="modal-close" id="modalClose">Close</button>
+          </div>
+          <div class="modal-meta">
+            <div class="modal-meta-item">
+              Station<span id="mStation">—</span>
+            </div>
+            <div class="modal-meta-item">Staff<span>Staff 01</span></div>
+            <div class="modal-meta-item">Start<span id="mStart">—</span></div>
+            <div class="modal-meta-item">End<span id="mEnd">—</span></div>
+          </div>
+        </div>
+        <div class="modal-revenue-block">
+          <div class="mrb-label">Estimated Revenue Leakage This Shift</div>
+          <div class="mrb-range" id="mRevRange">£0.00 – £0.00</div>
+          <div class="mrb-sub">
+            Based on public fare assumptions ·
+            <span id="mFareBand">—</span> conditions
+          </div>
+        </div>
+        <div class="modal-section-label">Incident Breakdown</div>
+        <table class="breakdown-table" id="breakdownTable"></table>
+        <div class="peak-strip">
+          <div class="peak-cell">
+            <div class="pc-label">Peak Incidents</div>
+            <div class="pc-value" id="mPeakCount">0</div>
+          </div>
+          <div class="peak-cell">
+            <div class="pc-label">Off-Peak Incidents</div>
+            <div class="pc-value" id="mOffPeakCount">0</div>
+          </div>
+        </div>
+        <div class="am-note" id="amNote"></div>
+        <div class="ai-panel">
+          <div class="ai-panel-head">
+            <div>
+              <div class="ai-panel-title">AI-assisted Shift Summary</div>
+              <div class="ai-panel-subtitle">
+                AI-assisted draft for management review
+              </div>
+            </div>
+            <button
+              class="modal-btn confirm ai-generate-btn"
+              id="aiGenerateBtn"
+            >
+              Generate Summary
+            </button>
+          </div>
+          <div class="ai-panel-body">
+            <div class="ai-status" id="aiStatus"></div>
+            <div class="ai-local-note">
+              Local demo only. This AI-assisted summary layer is not part of the production or UAT build.
+            </div>
+            <div class="ai-empty" id="aiEmptyState">
+              Generate a grounded management draft using only the structured
+              report data shown in this panel.
+            </div>
+            <div class="ai-result" id="aiResult" hidden>
+              <div class="ai-field">
+                <div class="ai-field-label">Management Summary</div>
+                <p class="ai-summary-text" id="aiSummaryText"></p>
+              </div>
+              <div class="ai-field">
+                <div class="ai-field-label">Key Observations</div>
+                <ul class="ai-observations" id="aiObservations"></ul>
+              </div>
+              <div class="ai-field">
+                <div class="ai-field-label">Suggested Review / Action</div>
+                <p class="ai-action-text" id="aiActionText"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn discard" id="modalDiscard">
+            Discard & Reset
+          </button>
+          <button class="modal-btn confirm" id="modalConfirm">
+            Confirm & Sync
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- App -->
+    <div class="app">
+      <div class="transit-header">
+        <div class="transit-header-top">
+          <div class="header-brand">
+            <svg
+              class="roundel"
+              viewBox="0 0 42 42"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="21" cy="21" r="20" fill="#003B8E" />
+              <circle
+                cx="21"
+                cy="21"
+                r="20"
+                fill="none"
+                stroke="#E21836"
+                stroke-width="4.5"
+              />
+              <rect x="1" y="18" width="40" height="6" fill="#E21836" />
+            </svg>
+            <div>
+              <div class="header-title">Rapid Report</div>
+              <div class="header-sub">Operational Intelligence · PWA v2.2</div>
+            </div>
+          </div>
+          <div class="live-pill">
+            <div class="live-dot"></div>
+            Active
+          </div>
+        </div>
+        <div class="red-bar"></div>
+      </div>
+
+      <div class="shift-strip">
+        <div class="shift-cell">
+          <div class="sc-label">Station</div>
+          <div class="sc-value" id="scStation">—</div>
+        </div>
+        <div class="shift-cell">
+          <div class="sc-label">Start</div>
+          <div class="sc-value" id="scStart">—</div>
+        </div>
+        <div class="shift-cell">
+          <div class="sc-label">Now</div>
+          <div class="sc-value" id="scNow">—</div>
+        </div>
+        <div class="shift-cell">
+          <div class="sc-label">Staff</div>
+          <div class="sc-value">Staff 01</div>
+        </div>
+      </div>
+
+      <div class="counter-block">
+        <div class="counter-label">Total Incidents This Shift</div>
+        <div class="counter-num" id="counterNum">0</div>
+        <div class="counter-sub">Data-Point Accumulation</div>
+        <div class="revenue-range" id="revenueRange" style="display: none">
+          Est. Revenue at Risk: <span id="revMin">£0.00</span> –
+          <span id="revMax">£0.00</span>
+        </div>
+      </div>
+
+      <div class="incident-grid">
+        <button class="inc-btn primary" id="doubleGateBtn">
+          <div class="inc-btn-inner">
+            <div class="inc-label">Double Gate</div>
+            <div class="inc-sub">Tailgate · 1 Person</div>
+          </div>
+        </button>
+        <button class="inc-btn primary push-through" id="pushThroughBtn">
+          <div class="inc-btn-inner">
+            <div class="inc-label">Push Through</div>
+            <div class="inc-sub">Forced · 1 Person</div>
+          </div>
+        </button>
+        <button class="inc-btn secondary" id="groupBtn">
+          <div class="inc-btn-inner">
+            <div class="inc-label">Group Entry</div>
+            <div class="inc-sub">Multiple Evaders · Tap to specify count</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="undo-row">
+        <button class="act-btn" id="undoBtn">
+          <div class="act-icon">↩</div>
+          <span class="act-label">Undo Last Entry</span>
+        </button>
+      </div>
+
+      <div class="sec-header">
+        <span>Live Audit Trail</span>
+        <span class="sec-badge" id="actBadge">0 Entries</span>
+      </div>
+      <div class="activity-list" id="activityList">
+        <div class="empty-state">Standing by for gate-line input...</div>
+      </div>
+
+      <div class="ejm-bar">
+        <span class="ejm-text">Every Journey Matters</span>
+      </div>
+
+      <div class="status-bar">
+        <div class="sb-left">
+          System: <span>PWA-v2.2</span> &nbsp;·&nbsp;
+          <span id="sbStation">—</span>
+        </div>
+        <button class="end-btn" id="endBtn">End Shift</button>
+      </div>
+    </div>
+
+    <script>
+      // ── Service Worker Registration ──
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./sw.js")
+            .then(() => console.log("[RR] Service worker registered"))
+            .catch((err) => console.warn("[RR] SW registration failed:", err));
+        });
+      }
+
+      const AI_DEMO_CONFIG = window.RR_AI_DEMO_CONFIG || {};
+      const AI_PROVIDER = AI_DEMO_CONFIG.API_PROVIDER || "anthropic";
+      const ANTHROPIC_API_KEY =
+        typeof AI_DEMO_CONFIG.ANTHROPIC_API_KEY === "string"
+          ? AI_DEMO_CONFIG.ANTHROPIC_API_KEY.trim()
+          : "";
+      const AI_MODEL = AI_DEMO_CONFIG.MODEL || "claude-sonnet-4-6";
+      const AI_LOCAL_WARNING =
+        "Local demo only. Do not deploy or expose live Anthropic keys in production or UAT.";
+
+      let count = 0,
+        incidents = [],
+        totalMin = 0,
+        totalMax = 0;
+      const shiftStart = new Date(),
+        STATION = "Station Meridian East";
+
+      const counterNum = document.getElementById("counterNum");
+      const activityList = document.getElementById("activityList");
+      const actBadge = document.getElementById("actBadge");
+      const modalOverlay = document.getElementById("modalOverlay");
+      const aiGenerateBtn = document.getElementById("aiGenerateBtn");
+      const aiStatus = document.getElementById("aiStatus");
+      const aiEmptyState = document.getElementById("aiEmptyState");
+      const aiResult = document.getElementById("aiResult");
+      const aiSummaryText = document.getElementById("aiSummaryText");
+      const aiObservations = document.getElementById("aiObservations");
+      const aiActionText = document.getElementById("aiActionText");
+
+      function tick() {
+        document.getElementById("scNow").textContent =
+          new Date().toLocaleTimeString("en-GB");
+      }
+      function fmtShort(d) {
+        return d.toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function getStructuredReportData(now = new Date()) {
+        const peakCount = incidents.filter((i) => i.isPeakIncident).length;
+        const offPeakCount = incidents.length - peakCount;
+        const types = {
+          "double-gate": {
+            key: "double-gate",
+            name: "Double Gate",
+            dot: "dot-double-gate",
+            count: 0,
+            min: 0,
+          },
+          "push-through": {
+            key: "push-through",
+            name: "Push Through",
+            dot: "dot-push-through",
+            count: 0,
+            min: 0,
+          },
+          other: {
+            key: "other",
+            name: "Group Entry",
+            dot: "dot-other",
+            count: 0,
+            min: 0,
+          },
+        };
+
+        incidents.forEach((incident) => {
+          if (types[incident.type]) {
+            types[incident.type].count += incident.amount;
+            types[incident.type].min += incident.minVal;
+          }
+        });
+
+        const breakdown = Object.values(types).filter((type) => type.count > 0);
+        const timeDiffHours = Math.max(1, (now - shiftStart) / 3600000);
+        const incidentRate = incidents.length / timeDiffHours;
+        const fareBand =
+          peakCount > 0 && offPeakCount > 0
+            ? "Mixed"
+            : peakCount > 0
+              ? "Peak"
+              : "Off-Peak";
+
+        return {
+          station: STATION,
+          staff: "Staff 01",
+          shiftStartLabel: fmtShort(shiftStart),
+          shiftEndLabel: fmtShort(now),
+          totalIncidents: count,
+          totalEntries: incidents.length,
+          peakCount,
+          offPeakCount,
+          fareBand,
+          revenueMin: totalMin,
+          revenueMax: totalMax,
+          revenueRangeLabel: `£${totalMin.toFixed(2)} – £${totalMax.toFixed(2)}`,
+          breakdown,
+          incidentRate,
+          incidentRateLabel: incidentRate.toFixed(1),
+          thresholdText: "Consider resource review if rate exceeds 3.0/hr.",
+          managementNote: `AM Note: ${count} people recorded over this shift at approx. ${incidentRate.toFixed(1)}/hr. Consider resource review if rate exceeds 3.0/hr.`,
+        };
+      }
+
+      function logIncident(type, label, amount, btn) {
+        const fares = getCurrentFares();
+        const minVal = fares.min * amount,
+          maxVal = fares.max * amount;
+        count += amount;
+        totalMin += minVal;
+        totalMax += maxVal;
+        incidents.unshift({
+          time: new Date(),
+          type,
+          label,
+          amount,
+          isPeakIncident: isPeak(),
+          minVal,
+          maxVal,
+        });
+        if (btn) addRipple(btn);
+        triggerFlash();
+        refreshUI();
+        saveData();
+      }
+
+      function refreshUI() {
+        counterNum.textContent = count;
+        actBadge.textContent = `${incidents.length} Entries`;
+        counterNum.classList.add("bump");
+        setTimeout(() => counterNum.classList.remove("bump"), 100);
+        const revEl = document.getElementById("revenueRange");
+        if (count > 0) {
+          revEl.style.display = "block";
+          document.getElementById("revMin").textContent =
+            `£${totalMin.toFixed(2)}`;
+          document.getElementById("revMax").textContent =
+            `£${totalMax.toFixed(2)}`;
+        } else {
+          revEl.style.display = "none";
+        }
+        if (!incidents.length) {
+          activityList.innerHTML = `<div class="empty-state">Standing by for gate-line input...</div>`;
+        } else {
+          activityList.innerHTML = incidents
+            .slice(0, 6)
+            .map(
+              (i) => `
+            <div class="activity-item">
+              <div class="act-left">
+                <div class="type-bar bar-${i.type}"></div>
+                <div>
+                  <div class="act-type">${i.label}</div>
+                  <div class="act-detail">${i.amount} person(s) · ${i.isPeakIncident ? "Peak" : "Off-Peak"}</div>
+                </div>
+              </div>
+              <div class="act-time">${fmtShort(new Date(i.time))}</div>
+            </div>`,
+            )
+            .join("");
+        }
+      }
+
+      function resetAiPanel() {
+        aiGenerateBtn.disabled = false;
+        aiGenerateBtn.textContent = "Generate Summary";
+        aiResult.hidden = true;
+        aiEmptyState.hidden = false;
+        aiSummaryText.textContent = "";
+        aiObservations.innerHTML = "";
+        aiActionText.textContent = "";
+        aiStatus.textContent = ANTHROPIC_API_KEY
+          ? `Local Anthropic demo configured (${AI_MODEL}). The browser will attempt a local-only Claude request and fall back to a grounded demo draft if unavailable. ${AI_LOCAL_WARNING}`
+          : `No local Anthropic key detected in config.local.js. Generate Summary will use grounded demo mode only. ${AI_LOCAL_WARNING}`;
+      }
+
+      function buildSummary() {
+        const report = getStructuredReportData();
+        document.getElementById("mStation").textContent = report.station;
+        document.getElementById("mStart").textContent = report.shiftStartLabel;
+        document.getElementById("mEnd").textContent = report.shiftEndLabel;
+        document.getElementById("mRevRange").textContent =
+          report.revenueRangeLabel;
+        document.getElementById("mPeakCount").textContent = report.peakCount;
+        document.getElementById("mOffPeakCount").textContent =
+          report.offPeakCount;
+        document.getElementById("mFareBand").textContent = report.fareBand;
+        document.getElementById("breakdownTable").innerHTML =
+          report.breakdown
+            .map(
+              (type) => `
+            <tr>
+              <td><div class="bt-type"><div class="bt-dot ${type.dot}"></div><span class="bt-name">${type.name}</span></div></td>
+              <td class="bt-count">${type.count}</td>
+              <td class="bt-rev">£${type.min.toFixed(2)}+</td>
+            </tr>`,
+            )
+            .join("") || `<tr><td colspan="3">No incidents</td></tr>`;
+        document.getElementById("amNote").textContent = report.managementNote;
+        resetAiPanel();
+      }
+
+      function getDominantPeriod(report) {
+        if (report.peakCount === report.offPeakCount) {
+          return "Activity was evenly split between peak and off-peak periods.";
+        }
+        return report.peakCount > report.offPeakCount
+          ? `Peak periods accounted for most logged entries (${report.peakCount} of ${report.totalEntries}).`
+          : `Off-peak periods accounted for most logged entries (${report.offPeakCount} of ${report.totalEntries}).`;
+      }
+
+      function buildDemoSummary(report) {
+        const leadingType =
+          report.breakdown.slice().sort((a, b) => b.count - a.count)[0] || null;
+        const summaryParts = [
+          `${report.station} recorded ${report.totalIncidents} people across ${report.totalEntries} logged entries this shift, with estimated revenue at risk of ${report.revenueRangeLabel}.`,
+          getDominantPeriod(report),
+        ];
+
+        if (leadingType) {
+          summaryParts.push(
+            `${leadingType.name} was the largest recorded category at ${leadingType.count} people.`,
+          );
+        }
+
+        const observations = [
+          `Estimated revenue at risk sits between £${report.revenueMin.toFixed(2)} and £${report.revenueMax.toFixed(2)} for this shift.`,
+          getDominantPeriod(report),
+        ];
+
+        if (leadingType) {
+          observations.push(
+            `${leadingType.name} contributed the highest recorded volume, with £${leadingType.min.toFixed(2)}+ in minimum fare exposure.`,
+          );
+        } else {
+          observations.push(report.managementNote.replace("AM Note: ", ""));
+        }
+
+        let action =
+          "Review the incident mix and use the structured report to confirm whether follow-up coverage or gate-line checks are needed on the next comparable shift.";
+        if (report.incidentRate > 3) {
+          action =
+            "Review staffing and gate-line coverage for similar shifts, as the logged entry rate is already above the 3.0/hr review threshold noted in the report.";
+        } else if (
+          leadingType &&
+          leadingType.key === "push-through" &&
+          leadingType.count >= 1
+        ) {
+          action =
+            "Review the push-through pattern with the shift team and check whether the affected gate-line period needs a short supervisor follow-up.";
+        }
+
+        return {
+          summary: summaryParts.join(" "),
+          observations: observations.slice(0, 3),
+          action,
+        };
+      }
+
+      function buildAiPrompt(report) {
+        return [
+          "Create a concise management draft from this structured shift report.",
+          "Use only the data provided below.",
+          "Do not invent historical baselines, anomaly detection, integrations, causes, or unsupported claims.",
+          "Sound like a professional manager briefing, not a chatbot.",
+          'Return JSON only with keys: "summary", "observations", "action".',
+          '"summary" must be one paragraph.',
+          '"observations" must contain 2 or 3 short bullet-style strings.',
+          '"action" must contain one suggested review/action grounded in the data.',
+          "",
+          JSON.stringify(
+            {
+              station: report.station,
+              total_incidents: report.totalIncidents,
+              total_logged_entries: report.totalEntries,
+              revenue_at_risk: report.revenueRangeLabel,
+              peak_incidents: report.peakCount,
+              off_peak_incidents: report.offPeakCount,
+              fare_band: report.fareBand,
+              incident_breakdown: report.breakdown.map((item) => ({
+                type: item.name,
+                count: item.count,
+                minimum_fare_exposure: `£${item.min.toFixed(2)}+`,
+              })),
+              note: report.managementNote,
+              threshold_text: report.thresholdText,
+            },
+            null,
+            2,
+          ),
+        ].join("\n");
+      }
+
+      function extractJsonObject(text) {
+        const fencedMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+        const raw = fencedMatch ? fencedMatch[1] : text;
+        const start = raw.indexOf("{");
+        const end = raw.lastIndexOf("}");
+
+        if (start === -1 || end === -1 || end <= start) {
+          throw new Error("No JSON object returned");
+        }
+
+        return JSON.parse(raw.slice(start, end + 1));
+      }
+
+      function parseAiResponse(text) {
+        const parsed = extractJsonObject(text);
+        const observations = Array.isArray(parsed.observations)
+          ? parsed.observations
+              .map((item) => String(item || "").trim())
+              .filter(Boolean)
+              .slice(0, 3)
+          : [];
+
+        if (!parsed.summary || !observations.length || !parsed.action) {
+          throw new Error("Incomplete AI response");
+        }
+
+        return {
+          summary: String(parsed.summary).trim(),
+          observations,
+          action: String(parsed.action).trim(),
+        };
+      }
+
+      async function generateAnthropicSummary(report) {
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-api-key": ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
+            // Explicitly flag this as an unsafe browser-side demo request.
+            "anthropic-dangerous-direct-browser-access": "true",
+          },
+          body: JSON.stringify({
+            model: AI_MODEL,
+            max_tokens: 350,
+            system:
+              "You write grounded management shift briefings for a local-only demo. Use only the structured report data provided by the user.",
+            messages: [
+              {
+                role: "user",
+                content: buildAiPrompt(report),
+              },
+            ],
+          }),
+        });
+
+        if (!response.ok) {
+          let message = `HTTP ${response.status}`;
+
+          try {
+            const errorPayload = await response.json();
+            if (
+              errorPayload &&
+              errorPayload.error &&
+              errorPayload.error.message
+            ) {
+              message = errorPayload.error.message;
+            }
+          } catch (error) {
+            console.warn("[RR] Could not parse Anthropic error payload", error);
+          }
+
+          throw new Error(message);
+        }
+
+        const data = await response.json();
+        const text = Array.isArray(data.content)
+          ? data.content
+              .filter((item) => item.type === "text" && item.text)
+              .map((item) => item.text)
+              .join("\n")
+          : "";
+
+        return parseAiResponse(text);
+      }
+
+      function renderAiSummary(summary, statusText) {
+        aiStatus.textContent = statusText;
+        aiEmptyState.hidden = true;
+        aiResult.hidden = false;
+        aiSummaryText.textContent = summary.summary;
+        aiActionText.textContent = summary.action;
+        aiObservations.innerHTML = "";
+        summary.observations.forEach((observation) => {
+          const item = document.createElement("li");
+          item.textContent = observation;
+          aiObservations.appendChild(item);
+        });
+      }
+
+      async function handleGenerateSummary() {
+        const report = getStructuredReportData();
+        aiGenerateBtn.disabled = true;
+        aiGenerateBtn.textContent = "Generating...";
+        aiStatus.textContent = ANTHROPIC_API_KEY
+          ? `Generating local-only summary with ${AI_PROVIDER} (${AI_MODEL})...`
+          : "Generating grounded demo draft from the structured report...";
+
+        try {
+          const summary = ANTHROPIC_API_KEY
+            ? await generateAnthropicSummary(report)
+            : buildDemoSummary(report);
+          const statusText = ANTHROPIC_API_KEY
+            ? `Generated with local-only Claude browser access using ${AI_MODEL}. ${AI_LOCAL_WARNING}`
+            : `Generated in grounded demo mode because no local Anthropic key is configured. This feature is for local demonstration only and is not part of the production or UAT build.`;
+          renderAiSummary(summary, statusText);
+        } catch (error) {
+          console.warn("[RR] AI summary fallback engaged:", error);
+          const demoSummary = buildDemoSummary(report);
+          renderAiSummary(
+            demoSummary,
+            `Claude request unavailable in-browser (${error.message}). Showing grounded local demo output instead. ${AI_LOCAL_WARNING}`,
+          );
+        } finally {
+          aiGenerateBtn.disabled = false;
+          aiGenerateBtn.textContent = "Generate Summary";
+        }
+      }
+
+      function closeModal() {
+        modalOverlay.classList.remove("open");
+      }
+      function resetShift() {
+        count = 0;
+        totalMin = 0;
+        totalMax = 0;
+        incidents = [];
+        localStorage.removeItem("rapidReport");
+        refreshUI();
+      }
+      function triggerFlash() {
+        document.getElementById("flash").classList.add("show");
+        setTimeout(
+          () => document.getElementById("flash").classList.remove("show"),
+          150,
+        );
+      }
+      function addRipple(btn) {
+        const r = document.createElement("span");
+        r.className = "ripple";
+        const s = Math.max(btn.offsetWidth, btn.offsetHeight);
+        r.style.cssText = `width:${s}px;height:${s}px;left:${btn.offsetWidth / 2 - s / 2}px;top:${btn.offsetHeight / 2 - s / 2}px`;
+        btn.appendChild(r);
+        setTimeout(() => r.remove(), 600);
+      }
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2200);
+      }
+      function saveData() {
+        localStorage.setItem(
+          "rapidReport",
+          JSON.stringify({ count, totalMin, totalMax, incidents }),
+        );
+      }
+      function loadData() {
+        const saved = JSON.parse(localStorage.getItem("rapidReport"));
+        if (saved) {
+          count = saved.count || 0;
+          totalMin = saved.totalMin || 0;
+          totalMax = saved.totalMax || 0;
+          incidents = saved.incidents || [];
+        }
+      }
+
+      document.getElementById("scStation").textContent = STATION;
+      document.getElementById("sbStation").textContent = STATION;
+      document.getElementById("scStart").textContent = fmtShort(shiftStart);
+      tick();
+      setInterval(tick, 1000);
+      loadData();
+      refreshUI();
+      resetAiPanel();
+
+      document.getElementById("doubleGateBtn").onclick = function () {
+        logIncident("double-gate", "Double Gate", 1, this);
+      };
+      document.getElementById("pushThroughBtn").onclick = function () {
+        logIncident("push-through", "Push Through", 1, this);
+      };
+      document.getElementById("groupBtn").onclick = function () {
+        const n = parseInt(prompt("Group size?"), 10);
+        if (n) logIncident("other", "Group Entry", n, this);
+      };
+      document.getElementById("undoBtn").onclick = () => {
+        if (!incidents.length) return showToast("Nothing to undo");
+        const last = incidents.shift();
+        count -= last.amount;
+        totalMin -= last.minVal;
+        totalMax -= last.maxVal;
+        refreshUI();
+        saveData();
+      };
+      document.getElementById("endBtn").onclick = () => {
+        if (!count) return showToast("No incidents recorded");
+        buildSummary();
+        modalOverlay.classList.add("open");
+      };
+      document.getElementById("modalClose").onclick = closeModal;
+      document.getElementById("modalDiscard").onclick = () => {
+        closeModal();
+        resetShift();
+        showToast("Shift discarded");
+      };
+      document.getElementById("modalConfirm").onclick = () => {
+        closeModal();
+        resetShift();
+        showToast("Shift report synced");
+      };
+      aiGenerateBtn.onclick = handleGenerateSummary;
+    </script>
+  </body>
+</html>
